@@ -1,5 +1,9 @@
 import pytz
 from datetime import date, timedelta
+from logs.models import Log
+from staff.models import Member
+from chats.models import Chat
+from offices.models import Office
 from features.db_management import (
     create_connection,
     insert_record,
@@ -21,6 +25,7 @@ def put_sub_category(log_id, sub_category):
 
     conn = create_connection("db.sqlite3")
     record = {"sub_category": sub_category}
+    log = Log.objects.get(pk=log_id)
     update_record(conn, "logbook", record, log_id)
     conn.close()
 

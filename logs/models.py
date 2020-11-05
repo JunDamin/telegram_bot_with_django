@@ -1,5 +1,6 @@
 from django.db import models
-
+from chats.models import Chat
+from staff.models import Member
 # Create your models here.
 
 
@@ -15,15 +16,15 @@ class Log(models.Model):
         (STATUS_GET_BACK, "Getting Back"),
     )
 
-    chat_id = models.ForeignKey('chats.Chat',  on_delete=models.PROTECT, related_name="log")
-    telegram_id = models.ForeignKey('staff.Member', on_delete=models.PROTECT, related_name='log')
+    chat_fk = models.ForeignKey(Chat, on_delete=models.PROTECT, related_name="log")
+    member_fk = models.ForeignKey(Member, on_delete=models.PROTECT, related_name='log')
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    log_datetime = models.DateTimeField()
+    log_datetime = models.DateTimeField(null=True)
     status = models.CharField(max_length=100, choices=STATUS_CHOICES)
     optional_status = models.CharField(max_length=100, null=True)
     longitude = models.CharField(max_length=100, null=True)
     latitude = models.CharField(max_length=100, null=True)
-    remarks = models.TextField()
-    confirmation = models.CharField(max_length=100)
-    edit_history = models.TextField()
+    remarks = models.TextField(null=True)
+    confirmation = models.CharField(max_length=100, null=True)
+    edit_history = models.TextField(null=True)

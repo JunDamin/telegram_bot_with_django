@@ -10,8 +10,8 @@ class LogAdmin(admin.ModelAdmin):
     """ Log Admin Definition """
 
     list_display = (
-        "chat_id",
-        "telegram_id", 
+        #"chat_fk",
+        "member_fk", 
         "first_name",
         "last_name",
         "log_datetime",
