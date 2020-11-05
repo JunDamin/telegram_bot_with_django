@@ -8,6 +8,6 @@ class Member(models.Model):
     last_name = models.CharField(max_length=100, null=True)
     koica_id = models.CharField(max_length=100, null=True)
     office_fk = models.ForeignKey("offices.Office", related_name="member", on_delete=models.SET_NULL, null=True)
-    is_active = models.BooleanField()
+    is_active = models.BooleanField(default=True)
     
 
