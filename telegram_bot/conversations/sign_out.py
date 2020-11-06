@@ -8,7 +8,6 @@ from features.data_IO import (
     get_text_of_log_by_id,
     put_confirmation,
     post_work_content,
-    put_work_content,
     delete_log_and_content,
     delete_content,
     get_record_by_log_id,
@@ -20,10 +19,6 @@ from features.message import (
     get_log_id_and_record,
     send_initiating_message_by_branch,
     set_location_not_available
-)
-from features.db_management import (
-    create_connection,
-    select_record,
 )
 from features.constant import LOG_COLUMN
 
@@ -99,12 +94,10 @@ def ask_confirmation_of_removal(update, context):
     log_id = context.user_data.get("log_id")
     if log_id:
 
-        conn = create_connection()
-        row = select_record(conn, "logbook", LOG_COLUMN, {"id": log_id})
-        conn.close()
-
+        row = get_record_by_log_id(log_id)
+        rows = (row,)
         header_message = f"Do you really want to do remove log No.{log_id}?\n"
-        text_message = make_text_from_logs(row, header_message)
+        text_message = make_text_from_logs(rows, header_message)
         keyboard = [["REMOVE SIGN OUT LOG", "NO"]]
 
         reply_markdown(update, context, text_message, keyboard)
@@ -128,8 +121,8 @@ def override_log(update, context):
         text_message = "process has been stoped. The log has not been deleted."
         reply_markdown(update, context, text_message)
         return ConversationHandler.END
-    log_id = post_basic_user_data(update, context, "signing out")
-    context.user_data["log_id"] = log_id
+    log = post_basic_user_data(update, context, "signing out")
+    context.user_data["log_id"] = log.id
     return ask_work_type(update, context)
 
 
@@ -196,7 +189,6 @@ def confirm_the_data(update, context):
 
 
 def ask_work_type(update, context):
-    delete_content(update, context)
     text_message = "Would you like to share your today's content of work?"
     keyboard = [
         ["I worked at Office", "I would like to report because I worked at home"]
@@ -235,9 +227,7 @@ def save_content_and_ask_location(update, context):
     record = get_record_by_log_id(log_id)
     work_content = context.user_data.get("work_content")
     work_content_id = record[LOG_COLUMN.index("work_content_id")]
-    if work_content_id:
-        put_work_content(update, context, work_content, work_content_id)
-    else:
-        post_work_content(update, context, work_content)
+    print(record)
+    post_work_content(update, context, work_content)
 
     return ask_sign_out_location(update, context)

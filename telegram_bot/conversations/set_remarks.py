@@ -1,6 +1,5 @@
 from telegram.ext import ConversationHandler
-from features.db_management import create_connection, update_records
-from features.data_IO import get_text_of_log_by_ids, get_record_by_log_ids
+from features.data_IO import get_text_of_log_by_ids, get_record_by_log_ids, put_remarks_by_ids
 from features.message import reply_markdown
 from features.log import log_info
 
@@ -45,11 +44,7 @@ def ask_content_for_remarks(update, context):
 def set_remarks(update, context):
     log_ids = context.user_data.get("remarks_log_ids")
     content = update.message.text
-    record = {"remarks": content}
-
-    conn = create_connection()
-    update_records(conn, "logbook", record, {}, f"id IN ({log_ids})")
-    conn.close()
+    put_remarks_by_ids(content, log_ids)
 
     context.user_data["log_id"] = log_ids
 

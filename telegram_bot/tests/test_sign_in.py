@@ -111,7 +111,7 @@ async def test_sign_in_rewrite(client: TelegramClient):
             ("Confirm", "Confirmed"),
         ]
 
-        await check_assert_with_qna(qna, conv)
+        log_id = await check_assert_with_qna(qna, conv)
 
     # earase log after use
     await erase_log(bot_id, str(log_id), client)
@@ -125,8 +125,6 @@ async def test_sign_in_edit(client: TelegramClient):
     # ...Sign In Test
     reply = await get_reply_of_message_of_id(chat_room_id, "sign in", client)
     reply = await get_reply_of_message_of_id(bot_id, "", client)
-    m = re.search(r"Log No.(\d+)", reply)
-    log_id = m.group(1)
 
     # Signing in conversation
     async with client.conversation(bot_id) as conv:
@@ -140,7 +138,7 @@ async def test_sign_in_edit(client: TelegramClient):
             ("Confirm", "Confirmed"),
         ]
 
-        await check_assert_with_qna(qna, conv)
+        log_id = await check_assert_with_qna(qna, conv)
 
         # earase log after use
         await erase_log(bot_id, str(log_id), client)

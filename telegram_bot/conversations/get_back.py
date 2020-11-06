@@ -8,6 +8,8 @@ from features.data_IO import (
     make_text_from_logs,
     get_text_of_log_by_id,
     put_confirmation,
+    get_record_by_log_id,
+    delete_log_and_content
 )
 from features.message import (
     reply_markdown,
@@ -16,11 +18,6 @@ from features.message import (
     get_log_id_and_record,
     send_initiating_message_by_branch,
     set_location_not_available
-)
-from features.db_management import (
-    create_connection,
-    delete_record,
-    select_record
 )
 from features.constant import LOG_COLUMN
 
@@ -85,12 +82,10 @@ Welcome back. You have been logged with Log No.{log_id}"""
 def ask_confirmation_of_removal(update, context):
     log_id = context.user_data.get("log_id")
     if log_id:
-        conn = create_connection()
-        row = select_record(conn, "logbook", LOG_COLUMN, {"id": log_id})
-        conn.close()
-
+        row = get_record_by_log_id(log_id)
+        rows = (row,)
         header_message = f"Do you really want to do remove log No.{log_id}?\n"
-        text_message = make_text_from_logs(row, header_message)
+        text_message = make_text_from_logs(rows, header_message)
         keyboard = [["REMOVE GET BACK LOG", "NO"]]
 
         reply_markdown(update, context, text_message, keyboard)
@@ -106,12 +101,8 @@ def override_log_and_ask_lunch_type(update, context):
     choices = {"REMOVE GET BACK LOG": True, "NO": False}
     answer = choices.get(update.message.text)
     if answer:
-        log_id = context.user_data.get("log_id")
-
-        conn = create_connection()
-        delete_record(conn, "logbook", {"id": log_id})
-        conn.close()
-
+        log_id = delete_log_and_content(update, context)
+        
         text_message = f"Log No. {log_id} has been Deleted\n"
         reply_markdown(update, context, text_message)
 
@@ -121,8 +112,8 @@ def override_log_and_ask_lunch_type(update, context):
 
         return ConversationHandler.END
 
-    log_id = post_basic_user_data(update, context, "getting back")
-    context.user_data["log_id"] = log_id
+    log = post_basic_user_data(update, context, "getting back")
+    context.user_data["log_id"] = log.id
     return ask_lunch_type(update, context)
 
 

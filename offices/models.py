@@ -1,8 +1,8 @@
 from django.db import models
+from core import models as core_models
 
-# Create your models here.
 
-class Office(models.Model):
+class Office(core_models.TimeStampedModel):
     office_name_kr = models.CharField(max_length=100)
     office_name_en = models.CharField(max_length=200, null=True)
     office_code = models.IntegerField(null=True)

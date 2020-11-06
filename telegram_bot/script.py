@@ -2,9 +2,7 @@ from offices.models import Office
 from chats.models import Chat
 from logs.models import Log
 from staff.models import Member
-from datetime import datetime
 import pytz
-from django.utils.timezone import make_aware
 
 tz = pytz.timezone("Africa/Douala")
 

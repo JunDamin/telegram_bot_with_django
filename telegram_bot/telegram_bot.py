@@ -3,13 +3,10 @@ from collections import deque
 from telegram.ext import Updater
 from features.callback_function import command_handlers
 from conversations.conversation import conversation_handlers
-from features.db_management import start_database
 
 # Bot setting
 token = os.getenv("TOKEN")
 print("telegram bot started")
-
-start_database()
 
 
 def main():

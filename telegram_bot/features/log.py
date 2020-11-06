@@ -49,7 +49,7 @@ def log_info(path="log_info.log"):
                 user = update.message.from_user
                 user_data = args[1].user_data
                 logger.info(
-                    f"m_status: {user_data.get('status')}, log id: {user_data.get('log_id')}, {user.id} {user.first_name} {user.last_name} reply '{update.message.text}', run {func.__name__}"
+                    f"user_data: {user_data} | {user.id} {user.first_name} {user.last_name} reply '{update.message.text}', run {func.__name__}"
                 )
                 return func(*args, **kwargs)
             except Exception as e:

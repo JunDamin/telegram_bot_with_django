@@ -1,16 +1,19 @@
 from telegram import ReplyKeyboardRemove
 from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters
-from features.db_management import create_connection, write_csv, select_record
+from features.db_management import write_csv
 from features.log import log_info
 from features.data_IO import (
     get_logs_of_today,
     make_text_from_logs,
     get_logs_of_the_day,
     get_text_of_log_by_id,
+    return_row,
 )
 from features.authority import private_only
 from features.message import reply_markdown
 from features.constant import LOG_COLUMN
+from logs.models import Log, WorkContent
+from staff.models import Member
 
 # Define a few command handlers. These usually take the two arguments update and
 # context. Error handlers also receive the raised TelegramError object in error.
@@ -47,9 +50,8 @@ def help_command(update, context):
 @log_info()
 def get_logbook(update, context):
     """ Send a file when comamnd /signbook is issued"""
-    conn = create_connection()
-    record = select_record(conn, "logbook", ["*"], {})
-    conn.close()
+    logs = Log.objects.all()
+    records = map(return_row, logs)
     header = [
         "id",
         "chat_id",
@@ -63,7 +65,7 @@ def get_logbook(update, context):
         "remarks",
         "confirmation",
     ]
-    write_csv(record, header, "signing.csv")
+    write_csv(records, header, "signing.csv")
     update.message.reply_document(document=open("signing.csv", "rb"))
 
 
@@ -79,17 +81,9 @@ def cancel(update, context):
 @log_info()
 def check_log(update, context):
     user = update.message.from_user
-
-    conn = create_connection()
-    rows = select_record(
-        conn,
-        "logbook",
-        LOG_COLUMN,
-        {"chat_id": user.id},
-        "ORDER BY timestamp DESC LIMIT 6",
-    )
-    rows = rows[-1::-1]
-    conn.close()
+    member = Member.objects.get_or_none(telegram_id=user.id)
+    logs = Log.objects.filter(member_fk=member).order_by("-created")[:5]
+    rows = map(return_row, logs)
 
     header_message = "Here is your recent log info.\n"
     text_message = make_text_from_logs(rows, header_message)
@@ -138,14 +132,18 @@ def reply_logs_of_the_date(update, context):
 
 @log_info()
 def get_work_content_file(update, context):
-    conn = create_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM contents")
-    rows = cursor.fetchall()
-    conn.close()
-    record = [list(map(lambda x: str(x).replace("\\n", "\n"), row)) for row in rows]
+    work_contents = WorkContent.objects.all()
+    rows = [
+        (
+            work_content.id,
+            work_content.first_name,
+            work_content.last_name,
+            work_content.content,
+        )
+        for work_content in work_contents
+    ]
     write_csv(
-        record,
+        rows,
         [
             "id",
         ],

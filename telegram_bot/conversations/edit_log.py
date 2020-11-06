@@ -1,6 +1,5 @@
 from telegram.ext import ConversationHandler
-from features.db_management import create_connection, select_record, update_record
-from features.data_IO import make_text_from_logs
+from features.data_IO import make_text_from_logs, get_logs_by_user_id, get_record_by_log_id, edit_history
 from features.log import log_info
 from features.message import reply_markdown, set_context
 from features.constant import LOG_COLUMN
@@ -15,19 +14,11 @@ def ask_log_id_to_edit(update, context):
 
     user = update.message.from_user
 
-    conn = create_connection()
-    rows = select_record(
-        conn,
-        "logbook",
-        LOG_COLUMN,
-        {"chat_id": user.id},
-        "ORDER BY timestamp DESC LIMIT 3",
-    )
-    rows = rows[-1::-1]
-    conn.close()
-
+    rows = get_logs_by_user_id(user.id, 3)
+    
     text_message = "Which log do you want to edit?\nPlease send me the log number."
-    text_message = make_text_from_logs(rows, text_message)
+    if rows:
+        text_message = make_text_from_logs(rows, text_message)
 
     reply_markdown(update, context, text_message)
 
@@ -43,15 +34,15 @@ def ask_confirmation_of_edit(update, context):
         int(log_id)
         keyboard = [["YES", "NO"]]
 
-        conn = create_connection()
-        rows = select_record(conn, "logbook", LOG_COLUMN, {"id": log_id})
-        conn.close()
+        row = get_record_by_log_id(log_id)
+        rows = (row,)
 
         header_message = f"Do you really want to do edit log No.{log_id}?\n"
         text_message = make_text_from_logs(rows, header_message)
         reply_markdown(update, context, text_message, keyboard)
-
-        chat_id = rows[0][1]
+    
+        chat_id = rows[0][1].telegram_id
+        print(chat_id)
 
         set_context(update, context, {"log_id": log_id, "chat_id": chat_id})
 
@@ -68,14 +59,8 @@ def start_edit(update, context):
     answer = choices.get(update.message.text)
     if answer:
         log_id = context.user_data.get("log_id")
+        status, history = edit_history(log_id)
 
-        conn = create_connection()
-        rows = select_record(conn, "logbook", ("category", "history"), {"id": log_id})
-        category = rows[0][0]
-        history = rows[0][1] if rows[0][1] else ""
-        history += f"Edited at {update.message.date} for {category}\n"
-        update_record(conn, "logbook", {"history": history}, log_id)
-        conn.close()
         keyboard_dict = {
             "signing in": [
                 ["Office", "Home"],
@@ -95,10 +80,10 @@ def start_edit(update, context):
             "signing out": "SIGN_OUT",
             "getting back": "GET_BACK",
         }
-        context.user_data["status"] = status_dict.get(category)
+        context.user_data["status"] = status_dict.get(status)
 
         text_message = f"start to edit Log No.{log_id} by press button\n"
-        reply_markdown(update, context, text_message, keyboard_dict.get(category))
+        reply_markdown(update, context, text_message, keyboard_dict.get(status))
     else:
         text_message = "process has been stoped. The log has not been deleted."
         reply_markdown(update, context, text_message)

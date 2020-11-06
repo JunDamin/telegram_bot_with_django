@@ -52,9 +52,8 @@ async def test_edit(client: TelegramClient):
     # ...Edit Test
     reply = await get_reply_of_message_of_id(bot_id, "/edit", client)
     m = re.search(r"Log No.(\d+)", reply)
-    if m:
-        log_id = m.group(1)
-        print(log_id)
+    log_id = m.group(1)
+    print(log_id)
     # conversation
     async with client.conversation(bot_id) as conv:
 

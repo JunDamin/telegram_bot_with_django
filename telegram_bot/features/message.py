@@ -87,16 +87,27 @@ def initiate_private_conversation(
 
 def get_log_id_and_record(update, context, session: str):
     user = update.message.from_user
-    rows = get_today_log_of_chat_id_category(user.id, session)
-    if rows:
-        record = rows[0]
-        log_id = record[0]
+    log = get_today_log_of_chat_id_category(user.id, session)
+    if log:
         is_exist = True
     else:
-        log_id = post_basic_user_data(update, context, session)
-        (record,) = get_today_log_of_chat_id_category(user.id, session)
+        log = post_basic_user_data(update, context, session)
         is_exist = False
-    return log_id, record, is_exist
+    record = (
+        log.id,
+        log.member_fk,
+        log.first_name,
+        log.last_name,
+        log.log_datetime,
+        log.status,
+        log.optional_status,
+        log.longitude,
+        log.latitude,
+        log.remarks,
+        log.confirmation,
+        "",
+    )
+    return log.id, record, is_exist
 
 
 def set_context(update, context, context_dict):

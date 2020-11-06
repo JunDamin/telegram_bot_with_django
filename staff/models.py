@@ -1,8 +1,9 @@
 from django.db import models
+from core import models as core_models
 
 # Create your models here.
 
-class Member(models.Model):
+class Member(core_models.TimeStampedModel):
     telegram_id = models.CharField(max_length=100, primary_key=True)
     first_name = models.CharField(max_length=100, null=True)
     last_name = models.CharField(max_length=100, null=True)

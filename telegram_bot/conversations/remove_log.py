@@ -1,10 +1,5 @@
 from telegram.ext import ConversationHandler
-from features.db_management import (
-    create_connection,
-    delete_record,
-    select_record
-)
-from features.data_IO import make_text_from_logs
+from features.data_IO import make_text_from_logs, get_record_by_log_id, delete_log_and_content
 from features.log import log_info
 from features.message import (
     reply_markdown,
@@ -34,12 +29,13 @@ def ask_confirmation_of_removal(update, context):
         context.user_data["remove_log_id"] = log_id
         keyboard = [["YES", "NO"]]
 
-        conn = create_connection()
-        row = select_record(conn, "logbook", LOG_COLUMN, {"id": log_id})
-        conn.close()
-
+        row = get_record_by_log_id(log_id)
+        if not row:
+            raise ValueError
+        
+        rows = (row,)
         header_message = f"Do you really want to do remove log No.{log_id}?\n"
-        text_message = make_text_from_logs(row, header_message)
+        text_message = make_text_from_logs(rows, header_message)
         reply_markdown(update, context, text_message, keyboard)
 
         return HANDLE_LOG_DELETE
@@ -56,9 +52,7 @@ def remove_log(update, context):
     if answer:
         log_id = context.user_data.get("remove_log_id")
 
-        conn = create_connection()
-        delete_record(conn, "logbook", {"id": log_id})
-        conn.close()
+        delete_log_and_content(update, context, log_id)
 
         text_message = f"Log No.{log_id} has been Deleted\n"
         reply_markdown(update, context, text_message)

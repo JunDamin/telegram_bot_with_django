@@ -1,5 +1,6 @@
 from time import sleep
 from telethon import TelegramClient
+import re
 
 sleep_time = 0.5
 
@@ -53,9 +54,16 @@ async def erase_log(chat_id, log_id, client: TelegramClient):
     sleep(sleep_time)
 
 
-async def check_assert_with_qna(qna: list, conv: TelegramClient.conversation):
+async def check_assert_with_qna(
+    qna: list, conv: TelegramClient.conversation, get_log=True
+):
 
     for q, a in qna:
         reply = await get_reply_of_message_in_conv(q, conv)
         print(f"q: {q}, reply: {reply}, a: {a}")
         assert a in reply
+        m = re.search(r"Log No.(\d+)", reply)
+        if m:
+            log_id = m.group(1)
+    if get_log:
+        return log_id

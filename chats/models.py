@@ -1,11 +1,14 @@
 from django.db import models
-from offices import models as office_model
+from core import models as core_models
 
 # Create your models here.
-class Chat(models.Model):
+class Chat(core_models.TimeStampedModel):
     chat_id = models.CharField(max_length=100, primary_key=True)
-    chat_name = models.CharField(max_length=100)
-    office_fk = models.ForeignKey("offices.Office", related_name="chat", on_delete=models.CASCADE, null=True)
+    chat_type = models.CharField(max_length=20)
+    chat_name = models.CharField(max_length=100, null=True)
+    office_fk = models.ForeignKey(
+        "offices.Office", related_name="chat", on_delete=models.CASCADE, null=True
+    )
     is_active = models.BooleanField(default=True)
 
     def __str__(self):

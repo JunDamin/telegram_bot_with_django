@@ -1,10 +1,11 @@
 from django.db import models
+from core import models as core_models
 from chats.models import Chat
 from staff.models import Member
 # Create your models here.
 
 
-class Log(models.Model):
+class Log(core_models.TimeStampedModel):
 
     STATUS_SIGN_IN = "signing in"
     STATUS_SIGN_OUT = "signing out"
@@ -28,3 +29,15 @@ class Log(models.Model):
     remarks = models.TextField(null=True)
     confirmation = models.CharField(max_length=100, null=True)
     edit_history = models.TextField(null=True)
+
+    def __str__(self):
+        return f"{self.log_datetime.isoformat()} {self.first_name}"
+
+
+class WorkContent(core_models.TimeStampedModel):
+    member_fk = models.ForeignKey(Member, on_delete=models.CASCADE)
+    log_fk = models.OneToOneField(Log, on_delete=models.CASCADE, related_name="work_content", null=True)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)    
+    content = models.TextField(null=True)
+    remarks = models.TextField(null=True)
