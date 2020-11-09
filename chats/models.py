@@ -12,4 +12,4 @@ class Chat(core_models.TimeStampedModel):
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.chat_name
+        return self.chat_name if self.chat_name else "Untitle"

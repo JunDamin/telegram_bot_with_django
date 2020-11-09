@@ -9,12 +9,12 @@ black = "*"
 pytest = "*"
 
 [packages]
-django = "*"
 django-dotenv = "*"
 python-telegram-bot = "*"
 telethon = "*"
 pytz = "*"
 pytest-asyncio = "*"
+django = "*"
 
 [requires]
 python_version = "3.8"
