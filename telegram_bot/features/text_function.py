@@ -8,7 +8,7 @@ def make_record_text(log):
     )
     text_message = f"""
     {log.status} {"- " + log.optional_status if log.optional_status else ""}
-    Log No.{log.id} : *__{log.local_date}__* *__{log.local_time}__*
+    Log No.{log.id} : *__{log.local_date()}__* *__{log.local_time()}__*
     location : {location_text}
     remarks : {log.remarks if log.remarks else "-"}\n"""
 

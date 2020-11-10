@@ -14,7 +14,7 @@ def return_row(log):
         log.member_fk,
         log.first_name,
         log.last_name,
-        log.log_datetime,
+        log.timestamp,
         log.status,
         log.optional_status,
         log.longitude,
@@ -43,11 +43,11 @@ def post_basic_user_data(update, context, status):
     """
     _chat = update.message.chat
     _member = update.message.from_user
-    log_datetime = update.message.date
+    timestamp = update.message.date
 
     member = get_or_register_user(_chat, _member)
 
-    log = save_log(member, log_datetime, status)
+    log = save_log(member, timestamp, status)
 
     return log
 
@@ -90,10 +90,10 @@ def get_or_create_member(user_id, first_name, last_name, office):
     return member
 
 
-def save_log(member, log_datetime, status):
+def save_log(member, timestamp, status):
     log = Log(
         member_fk=member,
-        log_datetime=log_datetime.astimezone(pytz.timezone("Africa/Douala")),
+        timestamp=timestamp,
         status=status,
     )
     log.save()
@@ -118,7 +118,7 @@ def set_user_context(update, context, status):
 def get_logs_of_today():
 
     start_date = date.today()
-    logs = Log.objects.filter(log_datetime=start_date)
+    logs = Log.objects.filter(timestamp=start_date)
     header_message = f"Today's Logging\n({date.today().isoformat()})"
     rows = map(return_row, logs)
     text_message = make_text_from_logs(rows, header_message)
@@ -130,7 +130,7 @@ def get_logs_of_the_day(the_date):
 
     start_date = date.fromisoformat(the_date)
 
-    logs = Log.objects.filter(log_datetime=start_date)
+    logs = Log.objects.filter(timestamp=start_date)
     header_message = f"Today's Logging\n({date.today().isoformat()})"
     rows = map(return_row, logs)
 
@@ -147,7 +147,7 @@ def get_today_log_of_chat_id_category(telegram_id, status):
     if not member:
         return False
     log = Log.objects.get_or_none(
-        log_datetime__date=start_date, member_fk=member, status=status
+        timestamp__date=start_date, member_fk=member, status=status
     )
 
     return log

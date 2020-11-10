@@ -15,6 +15,7 @@ from features.data_IO import (
     get_or_register_user,
     get_or_create_chat,
     save_log,
+    set_user_context,
 )
 from features.message import (
     reply_markdown,
@@ -40,21 +41,23 @@ def start_signing_in(update, context):
     user = update.message.from_user
     chat = update.message.chat
     log_datetime = update.message.date
+    status = "signing in"
 
     _chat = get_or_create_chat(chat.id, chat.type, chat.title)
     _user = get_or_register_user(_chat, user)
     log, is_exist = get_log_id_and_record(update, context, "signing in")
     logs = (log,)
+
+    set_user_context(update, context, status)
     
     # set dictionary data
-
     data_dict = {
         "new": {
             "group_message": SIGN_IN_GROUP_MESSAGE.format(
-                first_name=_user.frist_name, log_id=log.id, report_time=log.local_time
+                first_name=_user.first_name, log_id=log.id, report_time=log.local_time
             ),
             "private_message": SIGN_IN_PRIVATE_MESSAGE.format(
-                first_name=_user.first_name, log_id=log.id, report_time=log.local_time
+                first_name=_user.first_name, log_id=log.id, report_time=log.local_time()
             ),
             "keyboard": [
                 ["Office", "Home"],

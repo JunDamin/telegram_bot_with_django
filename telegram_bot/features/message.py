@@ -27,7 +27,6 @@ def send_markdown(update, context, user_id, text_message, reply_keyboard=False):
 
     text_message = convert_text_to_md(text_message)
     text_list = split_text_with_chunk_size_by_line(text_message)
-
     for text in text_list:
         context.bot.send_message(
             chat_id=user_id,
@@ -63,6 +62,8 @@ def convert_text_to_md(text):
         ")": "\\)",
         "+": "\\+",
         "=": "\\=",
+        "<": "\\<",
+        ">": "\\>",
     }
     for key in convert_dict:
         text = text.replace(key, convert_dict[key])

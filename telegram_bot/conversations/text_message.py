@@ -2,7 +2,7 @@ SIGN_IN_GREETING = (
         """Good morning, `{first_name}`.\nYou have signed in with Log No.{log_id}"""
     )
 SIGN_TIME = """signing time: {report_time}"""
-CHECK_DM = """_Please check my DM(Direct Message) to you_"""
+CHECK_DM = """_Please check my DM(Direct Message) to you"""
 ASK_SIGN_IN_INFO = """Would you like to share where you work?"""
 
 SIGN_IN_GROUP_MESSAGE = "\n".join([SIGN_IN_GREETING, CHECK_DM, SIGN_TIME])
