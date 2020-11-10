@@ -18,12 +18,12 @@ class Log(core_models.TimeStampedModel):
     member_fk = models.ForeignKey(Member, on_delete=models.PROTECT, related_name='log')
     timestamp = models.DateTimeField()
     status = models.CharField(max_length=100, choices=STATUS_CHOICES)
-    optional_status = models.CharField(max_length=100, null=True)
-    longitude = models.CharField(max_length=100, null=True)
-    latitude = models.CharField(max_length=100, null=True)
-    remarks = models.TextField(null=True)
-    confirmation = models.CharField(max_length=100, null=True)
-    edit_history = models.TextField(null=True)
+    optional_status = models.CharField(max_length=100, null=True, blank=True)
+    longitude = models.CharField(max_length=100, null=True, blank=True)
+    latitude = models.CharField(max_length=100, null=True, blank=True)
+    remarks = models.TextField(null=True, blank=True)
+    confirmation = models.CharField(max_length=100, null=True, blank=True)
+    edit_history = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.id} {self.timestamp}"
@@ -37,5 +37,5 @@ class Log(core_models.TimeStampedModel):
 
 class WorkContent(core_models.TimeStampedModel):
     log_fk = models.OneToOneField(Log, on_delete=models.CASCADE, related_name="work_content", null=True)
-    content = models.TextField(null=True)
-    remarks = models.TextField(null=True)
+    content = models.TextField(null=True, blank=True)
+    remarks = models.TextField(null=True, blank=True)

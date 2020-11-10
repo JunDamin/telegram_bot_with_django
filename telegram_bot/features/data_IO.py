@@ -51,6 +51,7 @@ def post_basic_user_data(update, context, status):
 def register_office(_chat):
     chat = get_or_create_chat(_chat.id, _chat.type, _chat.title)
     chat.office_fk = Office.objects.get(id=1)
+    chat.save()
 
 
 def get_or_register_user(_chat, _user):

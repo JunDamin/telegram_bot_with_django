@@ -8,6 +8,7 @@ from features.data_IO import (
     get_logs_of_the_day,
     get_text_of_log_by_id,
     return_row,
+    register_office,
 )
 from features.authority import private_only
 from features.message import reply_markdown
@@ -21,24 +22,12 @@ from staff.models import Member
 
 @log_info()
 def start(update, context):
-    """Send a message when the command /start is issued."""
-    text = """*bold \*text*
-_italic \*text_
-__underline__
-~strikethrough~
-*bold _italic bold ~italic bold strikethrough~ __underline italic bold___ bold*
-[inline URL](http://www.example.com/)
-[inline mention of a user](tg://user?id=123456789)
-`inline fixed-width code`
-```
-pre-formatted fixed-width code block
-```
-```python
-pre-formatted fixed-width code block written in the Python programming language
-```"""
-    text = text * 40
-    reply_markdown(update, context, text)
-    context.user_data["status"] = "START"
+    chat = update.message.chat
+    if chat.type == "private":
+        update.message.reply_text("Only in Group chat!")
+        return None
+    register_office(chat)
+    update.message.reply_text("Office registered!")
 
 
 @log_info()
