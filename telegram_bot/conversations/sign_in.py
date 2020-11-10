@@ -40,21 +40,20 @@ def start_signing_in(update, context):
     # set variables and context
     user = update.message.from_user
     chat = update.message.chat
-    log_datetime = update.message.date
     status = "signing in"
 
     _chat = get_or_create_chat(chat.id, chat.type, chat.title)
     _user = get_or_register_user(_chat, user)
-    log, is_exist = get_log_id_and_record(update, context, "signing in")
+    log, is_exist = get_log_id_and_record(update, context, status)
     logs = (log,)
 
-    set_user_context(update, context, status)
+    set_user_context(update, context, log)
     
     # set dictionary data
     data_dict = {
         "new": {
             "group_message": SIGN_IN_GROUP_MESSAGE.format(
-                first_name=_user.first_name, log_id=log.id, report_time=log.local_time
+                first_name=_user.first_name, log_id=log.id, report_time=log.local_time()
             ),
             "private_message": SIGN_IN_PRIVATE_MESSAGE.format(
                 first_name=_user.first_name, log_id=log.id, report_time=log.local_time()
@@ -87,17 +86,17 @@ def start_signing_in(update, context):
 def ask_confirmation_of_removal(update, context):
     log_id = context.user_data.get("log_id")
     if log_id:
-        row = get_record_by_log_id(log_id)
-        rows = (row,)
-        header_message = f"Do you really want to do remove log No.{log_id}?\n"
-        text_message = make_text_from_logs(rows, header_message)
+        log = get_record_by_log_id(log_id)
+        logs = (log,)
+        header_message = ASK_REMOVAL_CONFIRMATION.format(log_id=log_id)
+        text_message = make_text_from_logs(logs, header_message)
         keyboard = [["REMOVE SIGN IN LOG", "NO"]]
 
         reply_markdown(update, context, text_message, keyboard)
 
         return ANSWER_LOG_DELETE
     else:
-        text_message = "An Error has been made. Please try again."
+        text_message = ERROR_MESSAGE
         reply_markdown(update, context, text_message)
         return ConversationHandler.END
 
@@ -109,10 +108,10 @@ def override_log_and_ask_work_type(update, context):
     if answer:
         log_id = delete_log_and_content(update, context)
 
-        text_message = f"Log No. {log_id} has been Deleted\n"
+        text_message = INFO_REMOVAL.format(log_id=log_id)
         reply_markdown(update, context, text_message)
     else:
-        text_message = "process has been stoped. The log has not been deleted."
+        text_message = STOP_REMOVAL
         reply_markdown(update, context, text_message)
         return ConversationHandler.END
 
@@ -123,7 +122,7 @@ def override_log_and_ask_work_type(update, context):
 
 def ask_sub_category(update, context):
 
-    text_message = "Would you like to share where you work?"
+    text_message = ASK_SIGN_IN_OPTIONAL_STATUS
     keyboard = [
         ["Office", "Home"],
     ]
@@ -137,12 +136,10 @@ def set_sub_category_and_ask_location(update, context):
     """Get sub category"""
 
     # save log work type data
-
+    print(context.user_data)
     put_sub_category(context.user_data["log_id"], update.message.text)
 
-    text_message = """I see! Please send me your location by click the button on your phone.
-    1. Please check your location service is on.(if not please turn on your location service)
-    2. Desktop app can not send location"""
+    text_message = ASK_LOCATION
     keyboard = [
         [KeyboardButton("Share Location", request_location=True), "Not Available"],
     ]
@@ -155,7 +152,7 @@ def set_sign_in_location_and_ask_confirmation(update, context):
     set_location_not_available(update, context)
     user_data = context.user_data
 
-    HEADER_MESSAGE = "You have signed in as below. Do you want to confirm?"
+    HEADER_MESSAGE = ASK_LOG_CONFIRMATION
     if set_location(update, context):
         text_message = HEADER_MESSAGE
         keyboard = [["Confirm", "Edit"]]

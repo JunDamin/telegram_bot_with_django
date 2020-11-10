@@ -12,8 +12,6 @@ def return_row(log):
     return (
         log.id,
         log.member_fk,
-        log.first_name,
-        log.last_name,
         log.timestamp,
         log.status,
         log.optional_status,
@@ -58,10 +56,14 @@ def register_office(_chat):
 
 
 def get_or_register_user(_chat, _user):
-    chat = Chat.objects.get_or_none(id=_chat.id)
-    office = chat.office_fk
-    member = get_or_create_member(_user.id, _user.first_name, _user.last_name, office)
-    return member
+    member = Member.objects.get_or_none(id=_user.id)
+    if member:
+        return member
+    else:
+        chat = Chat.objects.get_or_none(id=_chat.id)
+        office = chat.office_fk
+        member = get_or_create_member(_user.id, _user.first_name, _user.last_name, office)
+        return member
 
 
 def get_or_create_chat(chat_id, chat_type, chat_name):
@@ -101,15 +103,16 @@ def save_log(member, timestamp, status):
     return log
 
 
-def set_user_context(update, context, status):
+def set_user_context(update, context, log):
     user = update.message.from_user
 
     basic_user_data = {
-        "chat_id": user.id,
+        "member_id": user.id,
         "first_name": user.first_name,
         "last_name": user.last_name,
-        "timestamp": update.message.date.astimezone(pytz.timezone("Africa/Douala")),
-        "category": status,
+        "timestamp": update.message.date,
+        "category": log.status,
+        "log_id": log.id,
     }
     for key in basic_user_data:
         context.user_data[key] = basic_user_data[key]
@@ -156,9 +159,8 @@ def get_today_log_of_chat_id_category(telegram_id, status):
 def get_record_by_log_id(log_id):
 
     log = Log.objects.get_or_none(id=log_id)
-    row = return_row(log) if log else None
 
-    return row
+    return log
 
 
 def get_record_by_log_ids(log_ids: str):
@@ -173,9 +175,7 @@ def get_record_by_log_ids(log_ids: str):
 def get_text_of_log_by_id(log_id):
 
     log = Log.objects.get_or_none(id=log_id)
-    row = return_row(log) if log else None
-    rows = (row,)
-    text_message = make_text_from_logs(rows)
+    text_message = make_text_from_logs([log,])
 
     return text_message
 
