@@ -81,12 +81,11 @@ def cancel(update, context):
 @log_info()
 def check_log(update, context):
     user = update.message.from_user
-    member = Member.objects.get_or_none(telegram_id=user.id)
+    member = Member.objects.get_or_none(id=user.id)
     logs = Log.objects.filter(member_fk=member).order_by("-created")[:5]
-    rows = map(return_row, logs)
 
     header_message = "Here is your recent log info.\n"
-    text_message = make_text_from_logs(rows, header_message)
+    text_message = make_text_from_logs(logs, header_message)
 
     reply_markdown(update, context, text_message)
 

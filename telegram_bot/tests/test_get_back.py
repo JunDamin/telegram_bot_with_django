@@ -106,7 +106,7 @@ async def test_get_back_rewrite(client: TelegramClient):
 
         response = await conv.get_response()
         print(response.text)
-        assert "Did you have lunch with KOICA Colleauge" in response.text
+        assert "Did you have lunch with KOICA collague" in response.text
 
         qna = [
             ("With KOICA Colleagues", "I see"),
@@ -135,7 +135,7 @@ async def test_get_back_edit(client: TelegramClient):
         qna = [
             ("With KOICA Colleagues", "I see"),
             ("Not Available", "You have gotten back as below"),
-            ("Edit", "Did you have lunch with KOICA Colleauge"),
+            ("Edit", "Did you have lunch with KOICA collague"),
             ("With KOICA Colleagues", "I see"),
             ("Not Available", "You have gotten back as below"),
             ("Confirm", "Confirmed"),

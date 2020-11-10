@@ -45,4 +45,4 @@ ASK_GET_BACK_INFO = """Did you have lunch with KOICA collagues?"""
 GET_BACK_GROUP_MESSAGE = "\n".join([GET_BACK_GREETING, CHECK_DM, SIGN_TIME])
 GET_BACK_PRIVATE_MESSAGE = "\n".join([GET_BACK_GREETING, ASK_GET_BACK_INFO, SIGN_TIME])
 
-ASK_GET_BACK_CONFIRMATION =  "You have signed out as below. Do you want to confirm?"
+ASK_GET_BACK_CONFIRMATION =  "You have gotten back as below. Do you want to confirm?"

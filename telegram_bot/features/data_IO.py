@@ -264,7 +264,7 @@ def make_text_from_logs(logs, header="", footer=""):
 
         if chat_id != user.id:
             chat_id = user.id
-            text_message += f"\n\n*_{user.first_name} {user.last_name}_'s log as below*\n"
+            text_message += f"\n\n*_{user.first_name} {user.last_name}_*'s log as below\n"
 
         record = make_record_text(log)
         text_message += record
@@ -284,11 +284,10 @@ def put_remarks_by_ids(remarks, log_ids: str):
 
 def get_logs_by_user_id(user_id, limit: int):
 
-    member = Member.objects.get_or_none(telegram_id=user_id)
+    member = Member.objects.get_or_none(id=user_id)
     if member:
         logs = Log.objects.filter(member_fk=member).order_by("-created")[:limit]
-        rows = map(return_row, logs)
-        return rows
+        return logs
 
 
 def edit_history(log_id):

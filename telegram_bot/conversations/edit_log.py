@@ -34,14 +34,14 @@ def ask_confirmation_of_edit(update, context):
         int(log_id)
         keyboard = [["YES", "NO"]]
 
-        row = get_record_by_log_id(log_id)
-        rows = (row,)
+        log = get_record_by_log_id(log_id)
+        logs = (log,)
 
         header_message = f"Do you really want to do edit log No.{log_id}?\n"
-        text_message = make_text_from_logs(rows, header_message)
+        text_message = make_text_from_logs(logs, header_message)
         reply_markdown(update, context, text_message, keyboard)
     
-        chat_id = rows[0][1].telegram_id
+        chat_id = log.member_fk.id
         print(chat_id)
 
         set_context(update, context, {"log_id": log_id, "chat_id": chat_id})
