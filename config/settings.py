@@ -48,7 +48,7 @@ PROJECT_APPS = [
     'staff.apps.StaffConfig',
 ]
 
-THIRD_PARTY_APPS = []
+THIRD_PARTY_APPS = ['import_export',]
 
 INSTALLED_APPS = DJANGO_APPS + PROJECT_APPS + THIRD_PARTY_APPS
 

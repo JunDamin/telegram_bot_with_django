@@ -1,13 +1,54 @@
 from django.contrib import admin
+from import_export import resources
+from import_export.admin import ImportExportMixin
+from import_export.fields import Field
 from . import models
 
-# Register your models here.
+
+class LogResource(resources.ModelResource):
+    local_datetime = Field()
+
+    class Meta:
+        model = models.Log
+        fields = (
+            "id",
+            "member_fk",
+            "member_fk__first_name",
+            "member_fk__last_name",
+            "local_datetime",
+            "status",
+            "optional_status",
+            "longitude",
+            "latitude",
+            "remarks",
+            "confirmation",
+            "edit_history",
+        )
+        export_order = (
+            "id",
+            "member_fk",
+            "member_fk__first_name",
+            "member_fk__last_name",
+            "local_datetime",
+            "status",
+            "optional_status",
+            "longitude",
+            "latitude",
+            "remarks",
+            "confirmation",
+            "edit_history",
+        )
+
+    def dehydrate_local_datetime(self, log):
+        return "%s %s" % (log.local_date(), log.local_time())
 
 
 @admin.register(models.Log)
-class LogAdmin(admin.ModelAdmin):
+class LogAdmin(ImportExportMixin, admin.ModelAdmin):
 
     """ Log Admin Definition """
+
+    resource_class = LogResource
 
     list_display = (
         "id",
