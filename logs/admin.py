@@ -62,6 +62,7 @@ class LogAdmin(ImportExportMixin, admin.ModelAdmin):
         "remarks",
         "confirmation",
         "edit_history",
+        "content"
     )
 
     list_filter = ("status",)

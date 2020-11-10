@@ -10,5 +10,5 @@ sys.path.append(os.path.join(os.getcwd(), "telegram_bot"))
 
 
 from telegram_bot.telegram_bot import main
+
 main()
-# import script

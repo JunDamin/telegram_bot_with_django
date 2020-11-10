@@ -128,6 +128,10 @@ sign_out_conv = ConversationHandler(
             sign_out.ask_work_content,
         ),
         MessageHandler(
+                Filters.regex("^I would like to report because I worked at home$") & Filters.private,
+                sign_out.ask_work_content,
+            ),
+        MessageHandler(
             Filters.regex("^Delete and Sign Out Again$") & Filters.private,
             sign_out.ask_confirmation_of_removal,
         ),

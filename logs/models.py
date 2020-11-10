@@ -26,13 +26,17 @@ class Log(core_models.TimeStampedModel):
     edit_history = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.id} {self.timestamp}"
+        return f"No.{self.id} : {self.local_date()} | {self.member_fk} | {self.status}"
 
     def local_date(self):
-        return self.timestamp.astimezone(self.member_fk.office_fk.office_timezone).strftime("%m-%d")
+        return self.timestamp.astimezone(self.member_fk.office_fk.office_timezone).strftime("%Y.%m.%d")
 
     def local_time(self):
         return self.timestamp.astimezone(self.member_fk.office_fk.office_timezone).strftime("%H:%M")
+
+
+    def content(self):
+        return f"No.{self.work_content.id}" if hasattr(self, "work_content") else "-"
 
 
 class WorkContent(core_models.TimeStampedModel):
