@@ -13,7 +13,7 @@ class OfficeAdmin(admin.ModelAdmin):
         "office_name_kr",
         "office_name_en", 
         "office_code",
-        "office_timezone",
+        "office_country",
         "office_open_time",
         "office_close_time",
     )

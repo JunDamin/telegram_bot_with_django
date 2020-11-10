@@ -1,9 +1,9 @@
 from django.db import models
 from core import models as core_models
 
-# Create your models here.
+
 class Chat(core_models.TimeStampedModel):
-    chat_id = models.CharField(max_length=100, primary_key=True)
+    id = models.CharField(max_length=100, primary_key=True)
     chat_type = models.CharField(max_length=20)
     chat_name = models.CharField(max_length=100, null=True)
     office_fk = models.ForeignKey(

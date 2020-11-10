@@ -1,6 +1,7 @@
 import pytz
 from telegram import KeyboardButton
 from telegram.ext import ConversationHandler
+from conversations.text_message import *
 from features.log import log_info
 from features.data_IO import (
     check_status,
@@ -10,7 +11,10 @@ from features.data_IO import (
     get_text_of_log_by_id,
     put_confirmation,
     get_record_by_log_id,
-    delete_log_and_content
+    delete_log_and_content,
+    get_or_register_user,
+    get_or_create_chat,
+    save_log,
 )
 from features.message import (
     reply_markdown,
@@ -18,12 +22,7 @@ from features.message import (
     set_location,
     get_log_id_and_record,
     send_initiating_message_by_branch,
-    set_location_not_available
-)
-
-from features.text_function import (
-    make_text_signing_in_greeting,
-    make_text_signing_in_and_ask_info,
+    set_location_not_available,
 )
 from features.constant import LOG_COLUMN
 
@@ -39,20 +38,23 @@ def start_signing_in(update, context):
 
     # set variables and context
     user = update.message.from_user
-    dt = update.message.date.astimezone(pytz.timezone("Africa/Douala"))
-    log_id, record, is_exist = get_log_id_and_record(update, context, "signing in")
-    context_dict = {"log_id": log_id, "status": "SIGN_IN"}
-    set_context(update, context, context_dict)
+    chat = update.message.chat
+    log_datetime = update.message.date
 
+    _chat = get_or_create_chat(chat.id, chat.type, chat.title)
+    _user = get_or_register_user(_chat, user)
+    log, is_exist = get_log_id_and_record(update, context, "signing in")
+    logs = (log,)
+    
     # set dictionary data
-    rewrite_header_message = "You have already signed in as below. "
-    rewrite_footer_message = "\nDo you want to *_delete it_* and sign in again? or SKIP it?"
 
     data_dict = {
         "new": {
-            "group_message": make_text_signing_in_greeting(log_id, user.first_name, dt),
-            "private_message": make_text_signing_in_and_ask_info(
-                log_id, user.first_name, dt
+            "group_message": SIGN_IN_GROUP_MESSAGE.format(
+                first_name=_user.frist_name, log_id=log.id, report_time=log.local_time
+            ),
+            "private_message": SIGN_IN_PRIVATE_MESSAGE.format(
+                first_name=_user.first_name, log_id=log.id, report_time=log.local_time
             ),
             "keyboard": [
                 ["Office", "Home"],
@@ -61,15 +63,13 @@ def start_signing_in(update, context):
         },
         "rewrite": {
             "group_message": make_text_from_logs(
-                [
-                    record,
-                ],
-                rewrite_header_message,
+                logs,
+                REWRITE_HEADER,
             ),
             "private_message": make_text_from_logs(
-                (record,),
-                rewrite_header_message,
-                rewrite_footer_message,
+                logs,
+                REWRITE_HEADER,
+                REWRITE_FOOTER,
             ),
             "keyboard": [
                 ["Delete and Sign In Again", "SKIP"],
@@ -105,7 +105,7 @@ def override_log_and_ask_work_type(update, context):
     answer = choices.get(update.message.text)
     if answer:
         log_id = delete_log_and_content(update, context)
-        
+
         text_message = f"Log No. {log_id} has been Deleted\n"
         reply_markdown(update, context, text_message)
     else:
@@ -134,20 +134,16 @@ def set_sub_category_and_ask_location(update, context):
     """Get sub category"""
 
     # save log work type data
-    if check_status(context, "SIGN_IN"):
-        put_sub_category(context.user_data["log_id"], update.message.text)
 
-        text_message = """I see! Please send me your location by click the button on your phone.
+    put_sub_category(context.user_data["log_id"], update.message.text)
+
+    text_message = """I see! Please send me your location by click the button on your phone.
     1. Please check your location service is on.(if not please turn on your location service)
     2. Desktop app can not send location"""
-        keyboard = [
-            [
-                KeyboardButton("Share Location", request_location=True), "Not Available"
-            ],
-        ]
-        reply_markdown(update, context, text_message, keyboard)
-    else:
-        print(context.user_data)
+    keyboard = [
+        [KeyboardButton("Share Location", request_location=True), "Not Available"],
+    ]
+    reply_markdown(update, context, text_message, keyboard)
     return ANSWER_SIGN_IN_LOCATION
 
 

@@ -4,7 +4,7 @@ from . import models
 # Register your models here.
 
 @admin.register(models.Member)
-class ReservationAdmin(admin.ModelAdmin):
+class MemberAdmin(admin.ModelAdmin):
 
     """ Member Admin Definition """
 
@@ -12,13 +12,13 @@ class ReservationAdmin(admin.ModelAdmin):
         (
             "Basic Info",
             {
-                "fields": ("telegram_id", "first_name", "last_name",)},
+                "fields": ("id", "first_name", "last_name",)},
         ),
         ("Extra Info", {"fields": ("koica_id", "office_fk", "is_active")},),
     )
 
     list_display = (
-        "telegram_id",
+        "id",
         "first_name",
         "last_name",
         "koica_id",

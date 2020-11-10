@@ -37,11 +37,71 @@ def put_sub_category(log_id, sub_category):
     log.save()
 
 
-def post_basic_user_data(update, context, category):
+def post_basic_user_data(update, context, status):
     """
-
     return: log_id
     """
+    _chat = update.message.chat
+    _member = update.message.from_user
+    log_datetime = update.message.date
+
+    member = get_or_register_user(_chat, _member)
+
+    log = save_log(member, log_datetime, status)
+
+    return log
+
+
+def register_office(_chat):
+    chat = get_or_create_chat(_chat.id, _chat.type, _chat.title)
+    chat.office_fk = Office.objects.get(id=1)
+
+
+def get_or_register_user(_chat, _user):
+    chat = Chat.objects.get_or_none(id=_chat.id)
+    office = chat.office_fk
+    member = get_or_create_member(_user.id, _user.first_name, _user.last_name, office)
+    return member
+
+
+def get_or_create_chat(chat_id, chat_type, chat_name):
+    chat = Chat.objects.get_or_none(id=chat_id)
+    if not chat:
+        chat = Chat(
+            id=chat_id,
+            chat_type=chat_type,
+            chat_name=chat_name,
+        )
+        chat.save()
+    return chat
+
+
+def get_or_create_member(user_id, first_name, last_name, office):
+    """ """
+    member = Member.objects.get_or_none(id=str(user_id))
+    if not member:
+        member = Member(
+            id=str(user_id),
+            first_name=first_name,
+            last_name=last_name,
+            office_fk=office,
+        )
+        member.save()
+    return member
+
+
+def save_log(member, log_datetime, status):
+    log = Log(
+        member_fk=member,
+        log_datetime=log_datetime.astimezone(pytz.timezone("Africa/Douala")),
+        status=status,
+    )
+    log.save()
+
+    return log
+
+
+def set_user_context(update, context, status):
     user = update.message.from_user
 
     basic_user_data = {
@@ -49,40 +109,10 @@ def post_basic_user_data(update, context, category):
         "first_name": user.first_name,
         "last_name": user.last_name,
         "timestamp": update.message.date.astimezone(pytz.timezone("Africa/Douala")),
-        "category": category,
+        "category": status,
     }
-    print(update.message.chat)
-    chat = Chat.objects.get_or_none(chat_id=update.message.chat.id)
-    if not chat:
-        chat = Chat(
-            chat_id=update.message.chat.id,
-            chat_type=update.message.chat.type,
-            chat_name=update.message.chat.title,
-        )
-        chat.save()
-    member = Member.objects.get_or_none(telegram_id=str(user.id))
-    if not member:
-        member = Member(
-            telegram_id=str(user.id),
-            first_name=user.first_name,
-            last_name=user.last_name,
-        )
-        member.save()
-
-    log = Log(
-        chat_fk=chat,
-        member_fk=member,
-        first_name=user.first_name,
-        last_name=user.last_name,
-        log_datetime=update.message.date.astimezone(pytz.timezone("Africa/Douala")),
-        status=category,
-    )
-    log.save()
-
     for key in basic_user_data:
         context.user_data[key] = basic_user_data[key]
-
-    return log
 
 
 def get_logs_of_today():
@@ -113,7 +143,7 @@ def get_logs_of_the_day(the_date):
 def get_today_log_of_chat_id_category(telegram_id, status):
     start_date = date.today()
 
-    member = Member.objects.get_or_none(telegram_id=telegram_id)
+    member = Member.objects.get_or_none(id=telegram_id)
     if not member:
         return False
     log = Log.objects.get_or_none(
@@ -237,16 +267,14 @@ def make_text_from_logs(logs, header="", footer=""):
     text_message = header
 
     chat_id = ""
-    for row in logs:
-        user_id = row[1]
-        first_name = row[2]
-        last_name = row[3]
+    for log in logs:
+        user = log.member_fk
 
-        if chat_id != user_id:
-            chat_id = user_id
-            text_message += f"\n\n*_{first_name} {last_name}_'s log as below*\n"
+        if chat_id != user.id:
+            chat_id = user.id
+            text_message += f"\n\n*_{user.first_name} {user.last_name}_'s log as below*\n"
 
-        record = make_record_text(row)
+        record = make_record_text(log)
         text_message += record
 
     text_message += footer

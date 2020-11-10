@@ -93,21 +93,8 @@ def get_log_id_and_record(update, context, session: str):
     else:
         log = post_basic_user_data(update, context, session)
         is_exist = False
-    record = (
-        log.id,
-        log.member_fk,
-        log.first_name,
-        log.last_name,
-        log.log_datetime,
-        log.status,
-        log.optional_status,
-        log.longitude,
-        log.latitude,
-        log.remarks,
-        log.confirmation,
-        "",
-    )
-    return log.id, record, is_exist
+
+    return log, is_exist
 
 
 def set_context(update, context, context_dict):

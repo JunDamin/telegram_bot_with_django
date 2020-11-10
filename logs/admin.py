@@ -10,11 +10,10 @@ class LogAdmin(admin.ModelAdmin):
     """ Log Admin Definition """
 
     list_display = (
-        "chat_fk",
+        "id",
         "member_fk",
-        "first_name",
-        "last_name",
-        "log_datetime",
+        "local_date",
+        "local_time",
         "status",
         "optional_status",
         "longitude",
@@ -34,11 +33,8 @@ class WorkContentAdmin(admin.ModelAdmin):
 
     list_display = (
         "log_fk",
-        "member_fk",
-        "first_name",
-        "last_name",
         "content",
         "remarks",
     )
 
-    list_filter = ("member_fk",)
+    list_filter = ("log_fk__status",)

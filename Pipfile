@@ -15,6 +15,8 @@ telethon = "*"
 pytz = "*"
 pytest-asyncio = "*"
 django = "*"
+django-countries = "*"
+django-timezone-field = "*"
 
 [requires]
 python_version = "3.8"

@@ -10,7 +10,7 @@ class ChatAdmin(admin.ModelAdmin):
     """ Chat Admin Definition """
 
     list_display = (
-        "chat_id",
+        "id",
         "chat_name", 
         "office_fk",
         "is_active",
