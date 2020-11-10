@@ -38,3 +38,11 @@ ASK_WORK_TYPE = "Would you like to share your today's content of work?"
 ASK_WORK_CONTENT = "OK. Please text me what you have done today for work briefly."
 
 CHECK_CONTENT = "Content of Work\n{answer}\n\nIs it ok?"
+
+GET_BACK_GREETING = """Good afternoon, {first_name}.\n
+Welcome back. You have been logged with Log No.{log_id}"""
+ASK_GET_BACK_INFO = """Did you have lunch with KOICA collagues?"""
+GET_BACK_GROUP_MESSAGE = "\n".join([GET_BACK_GREETING, CHECK_DM, SIGN_TIME])
+GET_BACK_PRIVATE_MESSAGE = "\n".join([GET_BACK_GREETING, ASK_GET_BACK_INFO, SIGN_TIME])
+
+ASK_GET_BACK_CONFIRMATION =  "You have signed out as below. Do you want to confirm?"

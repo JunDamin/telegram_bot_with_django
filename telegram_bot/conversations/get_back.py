@@ -1,6 +1,6 @@
-import pytz
 from telegram import KeyboardButton
 from telegram.ext import ConversationHandler
+from conversations.text_message import *
 from features.log import log_info
 from features.data_IO import (
     put_sub_category,
@@ -9,17 +9,18 @@ from features.data_IO import (
     get_text_of_log_by_id,
     put_confirmation,
     get_record_by_log_id,
-    delete_log_and_content
+    delete_log_and_content,
+    get_or_register_user,
+    get_or_create_chat,
+    set_user_context,
 )
 from features.message import (
     reply_markdown,
-    set_context,
     set_location,
     get_log_id_and_record,
     send_initiating_message_by_branch,
-    set_location_not_available
+    set_location_not_available,
 )
-from features.constant import LOG_COLUMN
 
 # Lunch break
 ANSWER_LOG_DELETE, ANSWER_LUNCH_TYPE, ANSWER_LUNCH_LOCATION, ANSWER_CONFIRMATION = [
@@ -32,42 +33,40 @@ def get_back_to_work(update, context):
 
     # set variables and context
     user = update.message.from_user
-    dt = update.message.date.astimezone(pytz.timezone("Africa/Douala"))
-    log_id, record, is_exist = get_log_id_and_record(update, context, "getting back")
-    context_dict = {"log_id": log_id, "status": "GET_BACK"}
-    set_context(update, context, context_dict)
+    chat = update.message.chat
+    status = "getting back"
 
-    GET_BACK_GREETING = f"""Good afternoon, {user.first_name}.\n
-Welcome back. You have been logged with Log No.{log_id}"""
-    dt = update.message.date.astimezone(pytz.timezone("Africa/Douala"))
-    SIGN_TIME = f"""signing time: {dt.strftime("%m-%d *__%H:%M__*")}"""
-    ASK_INFO = """Did you have lunch with KOICA collagues?"""
-    CHECK_DM = """"Please check my DM(Direct Message) to you"""
+    _chat = get_or_create_chat(chat.id, chat.type, chat.title)
+    _user = get_or_register_user(_chat, user)
+    log, is_exist = get_log_id_and_record(update, context, status)
+    logs = (log,)
 
-    # set dictionary data
-    rewrite_header_message = "You have already gotten back as below. "
-    rewrite_footer_message = "\nDo you want to delete it and get back again? or SKIP it?"
+    set_user_context(update, context, log)
+
+    "Please check my DM(Direct Message) to you" ""
 
     data_dict = {
         "new": {
-            "group_message": f"{GET_BACK_GREETING}\n{CHECK_DM}\n{SIGN_TIME}",
-            "private_message": f"{GET_BACK_GREETING}\n{ASK_INFO}\n{SIGN_TIME}",
+            "group_message": GET_BACK_GROUP_MESSAGE.format(
+                first_name=_user.first_name, log_id=log.id, report_time=log.local_time()
+            ),
+            "private_message": GET_BACK_PRIVATE_MESSAGE.format(
+                first_name=_user.first_name, log_id=log.id, report_time=log.local_time()
+            ),
             "keyboard": [
                 ["Without any member of KOICA", "With KOICA Colleagues"],
             ],
-            "return": ANSWER_LUNCH_TYPE
+            "return": ANSWER_LUNCH_TYPE,
         },
         "rewrite": {
             "group_message": make_text_from_logs(
-                [
-                    record,
-                ],
-                rewrite_header_message,
+                logs,
+                REWRITE_HEADER,
             ),
             "private_message": make_text_from_logs(
-                (record,),
-                rewrite_header_message,
-                rewrite_footer_message,
+                logs,
+                REWRITE_HEADER,
+                REWRITE_FOOTER,
             ),
             "keyboard": [
                 ["Delete and Get Back to Work Again", "SKIP"],
@@ -84,14 +83,14 @@ def ask_confirmation_of_removal(update, context):
     if log_id:
         row = get_record_by_log_id(log_id)
         rows = (row,)
-        header_message = f"Do you really want to do remove log No.{log_id}?\n"
+        header_message = ASK_REMOVAL_CONFIRMATION.format(log_id=log_id)
         text_message = make_text_from_logs(rows, header_message)
         keyboard = [["REMOVE GET BACK LOG", "NO"]]
 
         reply_markdown(update, context, text_message, keyboard)
         return ANSWER_LOG_DELETE
     else:
-        text_message = "An Error has been made. Please try again."
+        text_message = ERROR_MESSAGE
         reply_markdown(update, context, text_message)
         return ConversationHandler.END
 
@@ -102,12 +101,12 @@ def override_log_and_ask_lunch_type(update, context):
     answer = choices.get(update.message.text)
     if answer:
         log_id = delete_log_and_content(update, context)
-        
-        text_message = f"Log No. {log_id} has been Deleted\n"
+
+        text_message = INFO_REMOVAL.format(log_id=log_id)
         reply_markdown(update, context, text_message)
 
     else:
-        text_message = "process has been stoped. The log has not been deleted."
+        text_message = STOP_REMOVAL
         reply_markdown(update, context, text_message)
 
         return ConversationHandler.END
@@ -119,7 +118,7 @@ def override_log_and_ask_lunch_type(update, context):
 
 @log_info()
 def ask_lunch_type(update, context):
-    text_message = "Did you have lunch with KOICA Colleauges?"
+    text_message = ASK_GET_BACK_INFO
     keyboard = [
         ["Without any member of KOICA", "With KOICA Colleagues"],
     ]
@@ -132,12 +131,9 @@ def set_lunch_type_and_ask_lunch_location(update, context):
     """  """
     # save log work type data
     put_sub_category(context.user_data["log_id"], update.message.text)
-    text_message = """I see! Please send me your location by click the button on your phone.
-(Desktop app can not send location)"""
+    text_message = ASK_LOCATION
     keyboard = [
-        [
-            KeyboardButton("Share Location", request_location=True), "Not Available"
-        ],
+        [KeyboardButton("Share Location", request_location=True), "Not Available"],
     ]
     reply_markdown(update, context, text_message, keyboard)
     return ANSWER_LUNCH_LOCATION
@@ -147,7 +143,7 @@ def set_lunch_type_and_ask_lunch_location(update, context):
 def set_lunch_location_and_ask_confirmation(update, context):
     set_location_not_available(update, context)
     user_data = context.user_data
-    HEADER_MESSAGE = "You have gotten back as below. Do you want to confirm?"
+    HEADER_MESSAGE = ASK_GET_BACK_CONFIRMATION
     if set_location(update, context):
         text_message = HEADER_MESSAGE
         text_message += get_text_of_log_by_id(user_data.get("log_id"))
