@@ -1,11 +1,9 @@
-import pytz
-from datetime import date, timedelta, datetime
+from datetime import date, datetime
 from logs.models import Log, WorkContent
 from staff.models import Member
 from chats.models import Chat
 from offices.models import Office
 from features.text_function import make_record_text
-from features.constant import LOG_COLUMN
 
 
 def return_row(log):
@@ -222,21 +220,15 @@ def post_work_content(update, context, content):
 
     user = update.message.from_user
 
-    member = Member.objects.get(telegram_id=user.id)
+    member = Member.objects.get(id=user.id)
     log = Log.objects.get(id=context.user_data.get("log_id"))
 
     if hasattr(log, "work_content"):
         work_content = log.work_content
         work_content.content = content
-        work_content.member_fk = member
-        work_content.first_name = member.first_name
-        work_content.last_name = member.last_name
         work_content.log_fk = log
     else:
         work_content = WorkContent(
-            member_fk=member,
-            first_name=member.first_name,
-            last_name=member.last_name,
             content=content,
             log_fk=log,
         )

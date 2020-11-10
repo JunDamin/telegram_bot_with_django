@@ -1,10 +1,8 @@
-import pytz
 from telegram import KeyboardButton
 from telegram.ext import ConversationHandler
 from conversations.text_message import *
 from features.log import log_info
 from features.data_IO import (
-    check_status,
     put_sub_category,
     post_basic_user_data,
     make_text_from_logs,
@@ -14,18 +12,15 @@ from features.data_IO import (
     delete_log_and_content,
     get_or_register_user,
     get_or_create_chat,
-    save_log,
     set_user_context,
 )
 from features.message import (
     reply_markdown,
-    set_context,
     set_location,
     get_log_id_and_record,
     send_initiating_message_by_branch,
     set_location_not_available,
 )
-from features.constant import LOG_COLUMN
 
 # Sign in status
 (ANSWER_WORKPLACE, ANSWER_LOG_DELETE, ANSWER_SIGN_IN_LOCATION, ANSWER_CONFIRMATION) = [
@@ -152,7 +147,7 @@ def set_sign_in_location_and_ask_confirmation(update, context):
     set_location_not_available(update, context)
     user_data = context.user_data
 
-    HEADER_MESSAGE = ASK_LOG_CONFIRMATION
+    HEADER_MESSAGE = ASK_SIGN_IN_CONFIRMATION
     if set_location(update, context):
         text_message = HEADER_MESSAGE
         keyboard = [["Confirm", "Edit"]]

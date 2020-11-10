@@ -136,8 +136,6 @@ def get_work_content_file(update, context):
     rows = [
         (
             work_content.id,
-            work_content.first_name,
-            work_content.last_name,
             work_content.content,
         )
         for work_content in work_contents

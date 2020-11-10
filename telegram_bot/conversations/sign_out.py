@@ -1,4 +1,3 @@
-import pytz
 from telegram import KeyboardButton
 from telegram.ext import ConversationHandler
 from features.log import log_info
@@ -11,14 +10,17 @@ from features.data_IO import (
     delete_log_and_content,
     delete_content,
     get_record_by_log_id,
+    get_or_create_chat,
+    get_or_register_user,
+    set_user_context,
 )
+from conversations.text_message import *
 from features.message import (
     reply_markdown,
-    set_context,
     set_location,
     get_log_id_and_record,
     send_initiating_message_by_branch,
-    set_location_not_available
+    set_location_not_available,
 )
 from features.constant import LOG_COLUMN
 
@@ -39,27 +41,26 @@ def start_signing_out(update, context):
 
     # set variables and context
     user = update.message.from_user
-    dt = update.message.date.astimezone(pytz.timezone("Africa/Douala"))
-    log_id, record, is_exist = get_log_id_and_record(update, context, "signing out")
-    context_dict = {"log_id": log_id, "status": "SIGN_OUT"}
-    set_context(update, context, context_dict)
+    chat = update.message.chat
+    status = "signing out"
 
-    SIGN_OUT_GREETING = f"""Good evening, {user.first_name}.\nYou have signed out today with Log No.{log_id}"""
-    dt = update.message.date.astimezone(pytz.timezone("Africa/Douala"))
-    SIGN_TIME = f"""signing time: {dt.strftime("%m-%d *__%H:%M__*")}"""
-    ASK_INFO = "Would you like to share your today's content of work?"
-    CHECK_DM = """"Please check my DM(Direct Message) to you"""
+    _chat = get_or_create_chat(chat.id, chat.type, chat.title)
+    _user = get_or_register_user(_chat, user)
+    log, is_exist = get_log_id_and_record(update, context, status)
+    logs = (log,)
+
+    set_user_context(update, context, log)
 
     # set dictionary data
-    rewrite_header_message = "You have already signed out as below. "
-    rewrite_footer_message = (
-        "\nDo you want to delete it and sign out again? or SKIP it?"
-    )
 
     data_dict = {
         "new": {
-            "group_message": f"{SIGN_OUT_GREETING}\n{CHECK_DM}\n{SIGN_TIME}",
-            "private_message": f"{SIGN_OUT_GREETING}\n{ASK_INFO}\n{SIGN_TIME}",
+            "group_message": SIGN_OUT_GROUP_MESSAGE.format(
+                first_name=_user.first_name, log_id=log.id, report_time=log.local_time()
+            ),
+            "private_message": SIGN_OUT_PRIVATE_MESSAGE.format(
+                first_name=_user.first_name, log_id=log.id, report_time=log.local_time()
+            ),
             "keyboard": [
                 [
                     "I worked at Office",
@@ -70,15 +71,13 @@ def start_signing_out(update, context):
         },
         "rewrite": {
             "group_message": make_text_from_logs(
-                [
-                    record,
-                ],
-                rewrite_header_message,
+                logs,
+                REWRITE_HEADER,
             ),
             "private_message": make_text_from_logs(
-                (record,),
-                rewrite_header_message,
-                rewrite_footer_message,
+                logs,
+                REWRITE_HEADER,
+                REWRITE_FOOTER,
             ),
             "keyboard": [
                 ["Delete and Sign Out Again", "SKIP"],
@@ -93,18 +92,17 @@ def start_signing_out(update, context):
 def ask_confirmation_of_removal(update, context):
     log_id = context.user_data.get("log_id")
     if log_id:
-
-        row = get_record_by_log_id(log_id)
-        rows = (row,)
-        header_message = f"Do you really want to do remove log No.{log_id}?\n"
-        text_message = make_text_from_logs(rows, header_message)
+        log = get_record_by_log_id(log_id)
+        logs = (log,)
+        header_message = ASK_REMOVAL_CONFIRMATION.format(log_id=log_id)
+        text_message = make_text_from_logs(logs, header_message)
         keyboard = [["REMOVE SIGN OUT LOG", "NO"]]
 
         reply_markdown(update, context, text_message, keyboard)
 
         return ANSWER_LOG_DELETE
     else:
-        text_message = "An Error has been made. Please try again."
+        text_message = ERROR_MESSAGE
         reply_markdown(update, context, text_message)
         return ConversationHandler.END
 
@@ -115,10 +113,10 @@ def override_log(update, context):
     answer = choices.get(update.message.text)
     if answer:
         log_id = delete_log_and_content(update, context)
-        text_message = f"Log No. {log_id} has been Deleted\n"
+        text_message = INFO_REMOVAL.format(log_id=log_id)
         reply_markdown(update, context, text_message)
     else:
-        text_message = "process has been stoped. The log has not been deleted."
+        text_message = STOP_REMOVAL
         reply_markdown(update, context, text_message)
         return ConversationHandler.END
     log = post_basic_user_data(update, context, "signing out")
@@ -133,23 +131,18 @@ def ask_sign_out_location(update, context):
         "I would like to report because I worked at home": False,
     }
 
-    if check_branch.get(update.message.text):
-        log_id = context.user_data.get("log_id")
-        record = get_record_by_log_id(log_id)
-        work_content_id = record[LOG_COLUMN.index("work_content_id")]
-    else:
-        work_content_id = None
+    log_id = context.user_data.get("log_id")
+    log = get_record_by_log_id(log_id)
 
-    if work_content_id:
-        delete_content(update, context)
+    is_delete = check_branch.get(update.message.text) and hasattr(log, "work_content")
+    if is_delete:
+        work_content = log.work_content
+        work_content.delete()
 
-    text_message = """I see! Please send me your location by click the button on your phone.
-    1. Please check your location service is on.\n(if not please turn on your location service)
-    2. Desktop app can not send location"""
+
+    text_message = ASK_LOCATION
     keyboard = [
-        [
-            KeyboardButton("Share Location", request_location=True), "Not Available"
-        ],
+        [KeyboardButton("Share Location", request_location=True), "Not Available"],
     ]
 
     reply_markdown(update, context, text_message, keyboard)
@@ -161,7 +154,7 @@ def ask_sign_out_location(update, context):
 def set_sign_out_location(update, context):
     set_location_not_available(update, context)
     user_data = context.user_data
-    HEADER_MESSAGE = "You have signed out as below. Do you want to confirm?"
+    HEADER_MESSAGE = ASK_SIGN_OUT_CONFIRMATION
     if set_location(update, context):
         text_message = HEADER_MESSAGE
         keyboard = [["Confirm", "Edit"]]
@@ -189,7 +182,7 @@ def confirm_the_data(update, context):
 
 
 def ask_work_type(update, context):
-    text_message = "Would you like to share your today's content of work?"
+    text_message = ASK_WORK_TYPE
     keyboard = [
         ["I worked at Office", "I would like to report because I worked at home"]
     ]
@@ -202,7 +195,7 @@ def ask_work_type(update, context):
 @log_info()
 def ask_work_content(update, context):
 
-    text_message = "OK. Please text me what you have done today for work briefly."
+    text_message = ASK_WORK_CONTENT
     reply_markdown(update, context, text_message)
 
     return ANSWER_WORK_CONTENT
@@ -214,7 +207,7 @@ def check_work_content(update, context):
     answer = update.message.text
 
     context.user_data["work_content"] = answer
-    text_message = f"Content of Work\n{answer}\n\nIs it ok?"
+    text_message = CHECK_CONTENT.format(answer=answer)
     keyboard = [["YES", "NO"]]
     reply_markdown(update, context, text_message, keyboard)
 
@@ -223,11 +216,7 @@ def check_work_content(update, context):
 
 @log_info()
 def save_content_and_ask_location(update, context):
-    log_id = context.user_data.get("log_id")
-    record = get_record_by_log_id(log_id)
-    work_content = context.user_data.get("work_content")
-    work_content_id = record[LOG_COLUMN.index("work_content_id")]
-    print(record)
-    post_work_content(update, context, work_content)
+    content = context.user_data.get("work_content")
+    post_work_content(update, context, content)
 
     return ask_sign_out_location(update, context)
