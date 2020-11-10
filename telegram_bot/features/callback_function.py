@@ -12,7 +12,6 @@ from features.data_IO import (
 )
 from features.authority import private_only
 from features.message import reply_markdown
-from features.constant import LOG_COLUMN
 from logs.models import Log, WorkContent
 from staff.models import Member
 

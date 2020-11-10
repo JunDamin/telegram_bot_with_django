@@ -1,12 +1,18 @@
 from django.contrib import admin
 from . import models
-
+from logs.models import Log
 # Register your models here.
+
+
+class LogInline(admin.TabularInline):
+    model = Log
+    extra = 0
 
 @admin.register(models.Member)
 class MemberAdmin(admin.ModelAdmin):
 
     """ Member Admin Definition """
+    inlines = [LogInline]
 
     fieldsets = (
         (

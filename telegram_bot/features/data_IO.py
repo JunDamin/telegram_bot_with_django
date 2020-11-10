@@ -61,7 +61,9 @@ def get_or_register_user(_chat, _user):
     else:
         chat = Chat.objects.get_or_none(id=_chat.id)
         office = chat.office_fk
-        member = get_or_create_member(_user.id, _user.first_name, _user.last_name, office)
+        member = get_or_create_member(
+            _user.id, _user.first_name, _user.last_name, office
+        )
         return member
 
 
@@ -174,7 +176,11 @@ def get_record_by_log_ids(log_ids: str):
 def get_text_of_log_by_id(log_id):
 
     log = Log.objects.get_or_none(id=log_id)
-    text_message = make_text_from_logs([log,])
+    text_message = make_text_from_logs(
+        [
+            log,
+        ]
+    )
 
     return text_message
 
@@ -219,9 +225,6 @@ def put_confirmation(update, context):
 
 def post_work_content(update, context, content):
 
-    user = update.message.from_user
-
-    member = Member.objects.get(id=user.id)
     log = Log.objects.get(id=context.user_data.get("log_id"))
 
     if hasattr(log, "work_content"):
@@ -265,7 +268,9 @@ def make_text_from_logs(logs, header="", footer=""):
 
         if chat_id != user.id:
             chat_id = user.id
-            text_message += f"\n\n*_{user.first_name} {user.last_name}_*'s log as below\n"
+            text_message += (
+                f"\n\n*_{user.first_name} {user.last_name}_*'s log as below\n"
+            )
 
         record = make_record_text(log)
         text_message += record

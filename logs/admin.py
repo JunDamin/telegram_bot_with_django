@@ -62,10 +62,10 @@ class LogAdmin(ImportExportMixin, admin.ModelAdmin):
         "remarks",
         "confirmation",
         "edit_history",
-        "content"
+        "content",
     )
 
-    list_filter = ("status",)
+    list_filter = ("status", "optional_status")
 
 
 @admin.register(models.WorkContent)
