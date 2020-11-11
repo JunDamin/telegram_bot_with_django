@@ -124,11 +124,7 @@ sign_out_conv = ConversationHandler(
             sign_out.ask_sign_out_location,
         ),
         MessageHandler(
-            Filters.regex("^I would like to report$") & Filters.private,
-            sign_out.ask_work_content,
-        ),
-        MessageHandler(
-                Filters.regex("^I would like to report because I worked at home$") & Filters.private,
+                Filters.regex("^I worked at home\(I summit daily report\)$") & Filters.private,
                 sign_out.ask_work_content,
             ),
         MessageHandler(
@@ -143,7 +139,7 @@ sign_out_conv = ConversationHandler(
                 sign_out.ask_sign_out_location,
             ),
             MessageHandler(
-                Filters.regex("^I would like to report because I worked at home$") & Filters.private,
+                Filters.regex("^I worked at home\(I summit daily report\)$") & Filters.private,
                 sign_out.ask_work_content,
             ),
         ],

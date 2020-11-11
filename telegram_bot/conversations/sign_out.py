@@ -13,6 +13,7 @@ from features.data_IO import (
     get_or_create_chat,
     get_or_register_user,
     set_user_context,
+    put_sub_category
 )
 from conversations.text_message import *
 from features.message import (
@@ -64,7 +65,7 @@ def start_signing_out(update, context):
             "keyboard": [
                 [
                     "I worked at Office",
-                    "I would like to report because I worked at home",
+                    "I worked at home(I summit daily report)",
                 ]
             ],
             "return": ANSWER_WORK_TYPE,
@@ -127,14 +128,16 @@ def override_log(update, context):
 def ask_sign_out_location(update, context):
 
     check_branch = {
-        "I worked at Office": True,
-        "I would like to report because I worked at home": False,
+        "I worked at Office": "Office",
+        "I worked at home(I summit daily report)": "Home",
     }
-
+    optional_status = check_branch.get(update.message.text)
+    is_office = optional_status == "Office"
     log_id = context.user_data.get("log_id")
-    log = get_record_by_log_id(log_id)
+    put_sub_category(log_id, optional_status)
 
-    is_delete = check_branch.get(update.message.text) and hasattr(log, "work_content")
+    log = get_record_by_log_id(log_id)
+    is_delete = is_office and hasattr(log, "work_content")
     if is_delete:
         work_content = log.work_content
         work_content.delete()
@@ -184,7 +187,7 @@ def confirm_the_data(update, context):
 def ask_work_type(update, context):
     text_message = ASK_WORK_TYPE
     keyboard = [
-        ["I worked at Office", "I would like to report because I worked at home"]
+        ["I worked at Office", "I worked at home(I summit daily report)"]
     ]
 
     reply_markdown(update, context, text_message, keyboard)

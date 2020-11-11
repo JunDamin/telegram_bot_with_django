@@ -112,7 +112,7 @@ async def test_sign_out_rewrite(client: TelegramClient):
 
         qna = [
             (
-                "I would like to report",
+                "I worked at home(I summit daily report)",
                 "OK. Please text me what you have done",
             ),
             ("It is a test", "Content of Work"),
@@ -143,7 +143,7 @@ async def test_sign_out_edit(client: TelegramClient):
 
         qna = [
             (
-                "I would like to report",
+                "I worked at home(I summit daily report)",
                 "OK. Please text me what you have done",
             ),
             ("It is a test", "Content of Work"),
