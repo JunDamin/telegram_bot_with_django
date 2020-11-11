@@ -122,10 +122,9 @@ def set_user_context(update, context, log):
 def get_logs_of_today():
 
     start_date = date.today()
-    logs = Log.objects.filter(timestamp=start_date)
+    logs = Log.objects.filter(timestamp__date=start_date)
     header_message = f"Today's Logging\n({date.today().isoformat()})"
-    rows = map(return_row, logs)
-    text_message = make_text_from_logs(rows, header_message)
+    text_message = make_text_from_logs(logs, header_message)
 
     return text_message
 
