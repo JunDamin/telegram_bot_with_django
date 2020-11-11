@@ -129,8 +129,9 @@ def ask_sign_out_location(update, context):
 
     check_branch = {
         "I worked at Office": "Office",
-        "I worked at home(I summit daily report)": "Home",
+        "YES": "Home",
     }
+
     optional_status = check_branch.get(update.message.text)
     is_office = optional_status == "Office"
     log_id = context.user_data.get("log_id")
