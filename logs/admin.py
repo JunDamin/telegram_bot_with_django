@@ -1,7 +1,9 @@
 from django.contrib import admin
+from rangefilter.filter import DateRangeFilter
 from import_export import resources
-from import_export.admin import ImportExportMixin
+from import_export.admin import ImportExportMixin, ExportActionMixin
 from import_export.fields import Field
+from import_export.widgets import DateTimeWidget
 from . import models
 
 
@@ -44,7 +46,7 @@ class LogResource(resources.ModelResource):
 
 
 @admin.register(models.Log)
-class LogAdmin(ImportExportMixin, admin.ModelAdmin):
+class LogAdmin(ImportExportMixin, ExportActionMixin, admin.ModelAdmin):
 
     """ Log Admin Definition """
 
@@ -65,7 +67,12 @@ class LogAdmin(ImportExportMixin, admin.ModelAdmin):
         "content",
     )
 
-    list_filter = ("status", "optional_status")
+    list_filter = (
+        "timestamp",
+        ("timestamp", DateRangeFilter),
+        "status",
+        "optional_status",
+    )
 
 
 @admin.register(models.WorkContent)
