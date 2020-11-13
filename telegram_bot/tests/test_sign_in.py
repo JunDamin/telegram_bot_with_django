@@ -3,7 +3,6 @@ import pytest
 import re
 from time import sleep
 from telethon import TelegramClient
-from telethon.sessions import StringSession
 from common_parts import (
     get_reply_of_message_of_id,
     erase_log,
@@ -71,7 +70,7 @@ async def test_sign_in_first(client: TelegramClient):
 
         qna = [
             ("Office", "I see"),
-            ("Not Available", "You have signed in as below. Do you want to confirm"),
+            ("Not Available", "You have logged as below. Do you want to confirm"),
             ("Confirm", "Confirmed"),
         ]
 
@@ -95,8 +94,8 @@ async def test_sign_in_rewrite(client: TelegramClient):
     async with client.conversation(bot_id) as conv:
 
         qna = [
-            ("Delete and Sign In Again", "Do you really want to do remove log No."),
-            ("REMOVE SIGN IN LOG", "has been Deleted"),
+            ("Delete and Rewrite", "Do you really want to do remove log No."),
+            ("Remove the log", "has been Deleted"),
         ]
 
         await check_assert_with_qna(qna, conv)
@@ -107,7 +106,7 @@ async def test_sign_in_rewrite(client: TelegramClient):
 
         qna = [
             ("Office", "I see"),
-            ("Not Available", "You have signed in as below. Do you want to confirm"),
+            ("Not Available", "You have logged as below. Do you want to confirm"),
             ("Confirm", "Confirmed"),
         ]
 
@@ -131,10 +130,10 @@ async def test_sign_in_edit(client: TelegramClient):
 
         qna = [
             ("Office", "I see"),
-            ("Not Available", "You have signed in as below. Do you want to confirm"),
+            ("Not Available", "You have logged as below. Do you want to confirm"),
             ("Edit", "Would you like to share where you work"),
             ("Office", "I see"),
-            ("Not Available", "You have signed in as below. Do you want to confirm"),
+            ("Not Available", "You have logged as below. Do you want to confirm"),
             ("Confirm", "Confirmed"),
         ]
 
@@ -143,13 +142,3 @@ async def test_sign_in_edit(client: TelegramClient):
         # earase log after use
         await erase_log(bot_id, str(log_id), client)
 
-
-if __name__ == "__main__":
-    client = TelegramClient(StringSession(session_str), api_id, api_hash)
-    client.connect()
-    client.loop.run_until_complete(test_sign_in_check(client))
-    client.loop.run_until_complete(test_sign_in_first(client))
-    client.loop.run_until_complete(test_sign_in_rewrite(client))
-    client.loop.run_until_complete(test_sign_in_edit(client))
-    client.disconnect()
-    client.disconnecte

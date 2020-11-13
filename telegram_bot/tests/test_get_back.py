@@ -71,7 +71,7 @@ async def test_get_back_first(client: TelegramClient):
 
         qna = [
             ("Without any member of KOICA", "I see"),
-            ("Not Available", "You have gotten back as below"),
+            ("Not Available", "You have logged as below."),
             ("Confirm", "Confirmed"),
         ]
 
@@ -95,11 +95,8 @@ async def test_get_back_rewrite(client: TelegramClient):
     async with client.conversation(bot_id) as conv:
 
         qna = [
-            (
-                "Delete and Get Back to Work Again",
-                "Do you really want to do remove log No.",
-            ),
-            ("REMOVE GET BACK LOG", "has been Deleted"),
+            ("Delete and Rewrite", "Do you really want to do remove log No."),
+            ("Remove the log", "has been Deleted"),
         ]
 
         await check_assert_with_qna(qna, conv)
@@ -110,7 +107,7 @@ async def test_get_back_rewrite(client: TelegramClient):
 
         qna = [
             ("With KOICA Colleagues", "I see"),
-            ("Not Available", "You have gotten back as below"),
+            ("Not Available", "You have logged as below."),
             ("Confirm", "Confirmed"),
         ]
 
@@ -134,10 +131,10 @@ async def test_get_back_edit(client: TelegramClient):
 
         qna = [
             ("With KOICA Colleagues", "I see"),
-            ("Not Available", "You have gotten back as below"),
+            ("Not Available", "You have logged as below."),
             ("Edit", "Did you have lunch with KOICA collague"),
             ("With KOICA Colleagues", "I see"),
-            ("Not Available", "You have gotten back as below"),
+            ("Not Available", "You have logged as below."),
             ("Confirm", "Confirmed"),
         ]
 
@@ -145,13 +142,3 @@ async def test_get_back_edit(client: TelegramClient):
 
         # earase log after use
         await erase_log(bot_id, str(log_id), client)
-
-
-if __name__ == "__main__":
-    client = TelegramClient(StringSession(session_str), api_id, api_hash)
-    client.connect()
-    client.loop.run_until_complete(test_get_back_check(client))
-    client.loop.run_until_complete(test_get_back_first(client))
-    client.loop.run_until_complete(test_get_back_rewrite(client))
-    client.disconnect()
-    client.disconnecte

@@ -104,6 +104,18 @@ def save_log(member, timestamp, status):
     return log
 
 
+def get_log_by_id(log_id):
+    log = Log.objects.get_or_none(id=log_id)
+    return log
+
+
+def get_or_none_log_of_date(member, date, status):
+    log = Log.objects.get_or_none(
+        timestamp__date=date, member_fk=member, status=status
+    )
+    return log if log else None
+
+
 def set_user_context(update, context, log):
     user = update.message.from_user
 

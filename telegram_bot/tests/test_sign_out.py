@@ -3,7 +3,6 @@ import pytest
 import re
 from time import sleep
 from telethon import TelegramClient
-from telethon.sessions import StringSession
 from common_parts import (
     get_reply_of_message_of_id,
     erase_log,
@@ -75,7 +74,7 @@ async def test_sign_out_first(client: TelegramClient):
 
         qna = [
             ("I worked at Office", "I see"),
-            ("Not Available", "You have signed out as below"),
+            ("Not Available", "You have logged as below."),
             ("Confirm", "Confirmed"),
         ]
 
@@ -100,8 +99,8 @@ async def test_sign_out_rewrite(client: TelegramClient):
     async with client.conversation(bot_id) as conv:
 
         qna = [
-            ("Delete and Sign Out Again", "Do you really want to do remove log No."),
-            ("REMOVE SIGN OUT LOG", "has been Deleted"),
+            ("Delete and Rewrite", "Do you really want to do remove log No."),
+            ("Remove the log", "has been Deleted"),
         ]
 
         await check_assert_with_qna(qna, conv)
@@ -117,7 +116,7 @@ async def test_sign_out_rewrite(client: TelegramClient):
             ),
             ("It is a test", "Content of Work"),
             ("YES", "I see"),
-            ("Not Available", "You have signed out as below"),
+            ("Not Available", "You have logged as below."),
             ("Confirm", "Confirmed"),
         ]
 
@@ -125,6 +124,40 @@ async def test_sign_out_rewrite(client: TelegramClient):
 
     # earase log after use
     await erase_log(bot_id, str(log_id), client)
+
+
+
+@pytest.mark.asyncio
+async def test_sign_out_report(client: TelegramClient):
+    sleep(sleep_time)
+    # Getting information about yourself
+
+    # ...Get back Test
+    reply = await get_reply_of_message_of_id(chat_room_id, "sign out", client)
+    m = re.search(r"Log No.(\d+)", reply)
+    reply = await get_reply_of_message_of_id(bot_id, "", client)
+
+    if m:
+        log_id = m.group(1)
+        print(log_id)
+
+    # conversation
+    async with client.conversation(bot_id) as conv:
+
+        sleep(sleep_time)
+
+        qna = [
+            (
+                "I worked at home(I summit daily report)",
+                "OK. Please text me what you have done",
+            ),
+            ("It is a test", "Content of Work"),
+            ("YES", "I see"),
+            ("Not Available", "You have logged as below."),
+            ("Confirm", "Confirmed"),
+        ]
+
+        await check_assert_with_qna(qna, conv)
 
 
 @pytest.mark.asyncio
@@ -148,10 +181,10 @@ async def test_sign_out_edit(client: TelegramClient):
             ),
             ("It is a test", "Content of Work"),
             ("YES", "I see"),
-            ("Not Available", "You have signed out as below"),
+            ("Not Available", "You have logged as below."),
             ("Edit", "Would you like to share your today's content of work"),
             ("I worked at Office", "I see"),
-            ("Not Available", "You have signed out as below"),
+            ("Not Available", "You have logged as below."),
             ("Confirm", "Confirmed"),
             ("/work_content", ""),
         ]
@@ -161,13 +194,3 @@ async def test_sign_out_edit(client: TelegramClient):
         # earase log after use
         await erase_log(bot_id, str(log_id), client)
 
-
-if __name__ == "__main__":
-    client = TelegramClient(StringSession(session_str), api_id, api_hash)
-    client.connect()
-    # client.loop.run_until_complete(test_sign_out_check(client))
-    # client.loop.run_until_complete(test_sign_out_first(client))
-    # client.loop.run_until_complete(test_sign_out_rewrite(client))
-    client.loop.run_until_complete(test_sign_out_edit(client))
-    client.disconnect()
-    client.disconnecte

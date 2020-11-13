@@ -1,0 +1,51 @@
+@startuml general conversation
+:user initiate;
+partition  "check user" {
+if (check chat room is registered) then (yes)
+else (No)
+:register chat;
+endif
+if (check user is registered) then (yes)
+else (No)
+    :register user;
+endif
+}
+partition "check record" {
+if (check new record) then (exist)
+    :ask delete and write again;
+    if (answer) then (YES)
+        :ask confirmation;
+        if (answer) then (YES)
+            :delete log;
+        else (NO)
+            :end conversation;
+            stop
+        endif
+    else (NO)
+        :end coversation;
+        stop
+    endif
+else (New)
+endif 
+}
+partition "Insert data" {
+repeat
+    :ask work type;
+    :receive work type;
+    if (If the session is sign out and work at home?) then (yes)
+        repeat
+            :ask content;
+            :receive content;
+            :ask confirmation;
+        repeat while (user confirm)
+    else (no)
+    endif
+    :ask location;
+    :receive location;
+    :ask confirmation;
+repeat while (user confirm)
+:end conversation;
+}
+stop
+
+@enduml
