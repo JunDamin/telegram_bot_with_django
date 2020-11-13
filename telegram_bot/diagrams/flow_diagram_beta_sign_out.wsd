@@ -1,0 +1,43 @@
+@startuml
+:user initiate;
+if (check chat room is registered) then (yes)
+else (No)
+:register chat;
+endif
+if (check user is registered) then (yes)
+else (No)
+    :register user;
+endif
+if (check new record) then (exist)
+    if (ask delete and write again) then (YES)
+        if (ask confirmation) then (YES)
+            :delete log;
+        else (NO)
+            :end conversation;
+            stop
+        endif
+    else (NO)
+        :end coversation;
+        stop
+    endif
+else (New)
+endif 
+repeat
+    :ask work type;
+    :receive work type;
+    if (work at home?) then (yes)
+        repeat
+            :ask content;
+            :receive content;
+            :ask confirmation;
+        repeat while (user confirm)
+    else (no)
+    endif
+    :ask location;
+    :receive location;
+    :ask confirmation;
+repeat while (user confirm)
+:end conversation;
+stop
+
+@enduml
