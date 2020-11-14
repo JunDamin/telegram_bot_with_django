@@ -84,9 +84,7 @@ log_flow_conv = ConversationHandler(
         log_flow.ASK_OVERWRITE_CONFIRMATION: [
             MessageHandler(
                 Filters.regex(
-                    "$|^".join(
-                        text_message.ask_overwrite_confirmation_regex
-                    )
+                    "$|^".join(text_message.ask_overwrite_confirmation_regex)
                 ),
                 log_flow.receive_overwrite_confirmation,
             ),

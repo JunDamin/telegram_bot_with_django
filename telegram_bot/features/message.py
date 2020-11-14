@@ -71,19 +71,13 @@ def convert_text_to_md(text):
     return text
 
 
-def initiate_private_conversation(
-    update, context, group_message, private_message, keyboard
-):
-    user = update.message.from_user
-    group_keyboard = [["Sign In", "Back to Work", "Sign Out"]]
+def initiate_private_conversation(update, context, user_id, private_message, keyboard=False):
     try:
-        # send to group chat
-        send_markdown(update, context, update.message.chat.id, group_message)
-        send_markdown(update, context, user.id, private_message, keyboard)
+        send_markdown(update, context, user_id, private_message, keyboard)
 
     except Unauthorized:
         text_message = "Please, send 'Hi!' to me as DM(Direct Message) to authorize!"
-        reply_markdown(update, context, text_message, group_keyboard)
+        reply_markdown(update, context, text_message)
 
 
 def get_log_id_and_record(update, context, session: str):

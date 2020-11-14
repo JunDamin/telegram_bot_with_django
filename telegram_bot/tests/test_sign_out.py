@@ -126,7 +126,6 @@ async def test_sign_out_rewrite(client: TelegramClient):
     await erase_log(bot_id, str(log_id), client)
 
 
-
 @pytest.mark.asyncio
 async def test_sign_out_report(client: TelegramClient):
     sleep(sleep_time)
@@ -193,4 +192,3 @@ async def test_sign_out_edit(client: TelegramClient):
 
         # earase log after use
         await erase_log(bot_id, str(log_id), client)
-

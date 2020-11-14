@@ -35,6 +35,7 @@ from features.message import (
     reply_markdown,
     set_location_not_available,
     set_location,
+    initiate_private_conversation
 )
 
 # set status
@@ -178,7 +179,7 @@ def ask_optional_status(update, context):
 
     text_message = optional_status_message.get(session)
     keyboard = optional_status_keyboard.get(session)
-    send_markdown(
+    initiate_private_conversation(
         update,
         context,
         log.member_fk.id,
