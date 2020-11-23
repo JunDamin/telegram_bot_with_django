@@ -18,7 +18,7 @@ class StatusListFilter(MultipleChoiceListFilter):
 
 class MemberListFilter(MultipleChoiceListFilter):
     title = 'Member'
-    parameter_name = 'member__in'
+    parameter_name = 'member_fk__in'
 
     def lookups(self, requests, modle_admin):
         return staff_models.Member.objects.values_list('pk', 'first_name')
