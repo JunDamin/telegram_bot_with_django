@@ -74,11 +74,11 @@ def convert_text_to_md(text):
 def initiate_private_conversation(update, context, user_id, private_message, keyboard=False):
     try:
         send_markdown(update, context, user_id, private_message, keyboard)
-
+        return True
     except Unauthorized:
         text_message = "Please, send 'Hi!' to me as DM(Direct Message) to authorize!"
         reply_markdown(update, context, text_message)
-
+        return False
 
 def get_log_id_and_record(update, context, session: str):
     user = update.message.from_user
