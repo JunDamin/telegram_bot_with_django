@@ -6,6 +6,7 @@ from import_export.fields import Field
 from import_export.widgets import DateTimeWidget
 from django_admin_multiple_choice_list_filter.list_filters import MultipleChoiceListFilter
 from . import models
+from staff import models as staff_models
 
 class StatusListFilter(MultipleChoiceListFilter):
     title = 'Status'
@@ -13,6 +14,14 @@ class StatusListFilter(MultipleChoiceListFilter):
 
     def lookups(self, requests, modle_admin):
         return models.Log.STATUS_CHOICES
+
+
+class MemberListFilter(MultipleChoiceListFilter):
+    title = 'Member'
+    parameter_name = 'member__in'
+
+    def lookups(self, requests, modle_admin):
+        return staff_models.Member.objects.values_list('pk', 'first_name')
 
 
 class LogResource(resources.ModelResource):
@@ -85,7 +94,7 @@ class LogAdmin(ImportExportMixin, ExportActionMixin, admin.ModelAdmin):
         "timestamp",
         ("timestamp", DateRangeFilter),
         StatusListFilter,
-        "optional_status",
+        MemberListFilter,
     )
 
 
