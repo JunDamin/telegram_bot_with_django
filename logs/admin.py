@@ -4,7 +4,15 @@ from import_export import resources
 from import_export.admin import ImportExportMixin, ExportActionMixin
 from import_export.fields import Field
 from import_export.widgets import DateTimeWidget
+from django_admin_multiple_choice_list_filter.list_filters import MultipleChoiceListFilter
 from . import models
+
+class StatusListFilter(MultipleChoiceListFilter):
+    title = 'Status'
+    parameter_name = 'status__in'
+
+    def lookups(self, requests, modle_admin):
+        return models.Log.STATUS_CHOICES
 
 
 class LogResource(resources.ModelResource):
@@ -76,7 +84,7 @@ class LogAdmin(ImportExportMixin, ExportActionMixin, admin.ModelAdmin):
     list_filter = (
         "timestamp",
         ("timestamp", DateRangeFilter),
-        "status",
+        StatusListFilter,
         "optional_status",
     )
 
@@ -87,6 +95,7 @@ class WorkContentAdmin(admin.ModelAdmin):
     """ Work Content Admin Definition """
 
     list_display = (
+        "id", 
         "log_fk",
         "content",
         "remarks",

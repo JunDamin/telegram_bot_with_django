@@ -19,6 +19,7 @@ django-countries = "*"
 django-timezone-field = "*"
 django-import-export = "*"
 django-admin-rangefilter = "*"
+django-admin-multiple-choice-list-filter = "*"
 
 [requires]
 python_version = "3.8"
