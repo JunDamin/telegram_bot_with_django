@@ -51,7 +51,10 @@ def check_distance(log):
 def add_confirmation(log_out, text):
 
     if log_out.confirmation:
-        log_out.confirmation = text
+        if log_out.confirmation.find("user confirmed") == -1:
+            log_out.confirmation = text
+        else: 
+            log_out.confirmation = "user confirmed\n" + text
     else:
         log_out.confirmation = text
 
