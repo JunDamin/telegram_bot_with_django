@@ -248,10 +248,9 @@ def receive_log_confirmation(update, context):
     choices = {"Confirm": True, "Edit": False}
     answer = choices.get(update.message.text)
 
-    check_distance(update, context)
-
     if answer:
         put_confirmation(update, context)
+        check_distance(update, context)
         context.user_data.clear()
         text_message = "Confirmed"
         reply_markdown(update, context, text_message)
@@ -276,7 +275,8 @@ def check_distance(update, context):
 
             if x1 == "Not Available" or x2 == "Not Available":
                 output = "Not Available"
-            else:
+                add_confirmation(log_out, f"Not Available : Signed in at ({x2}, {y2})")
+            elif x1 and y1 and x2 and y2:
                 x1, y1 = map(float, (x1, y1))
                 x2, y2 = map(float, (x2, y2))
                 distance = sqrt((x1-x2)**2 + (y1-y2)**2)
@@ -284,6 +284,10 @@ def check_distance(update, context):
                     output = "OK"
                 else:
                     output = "Need to Check"
+                    add_confirmation(log_out, f"Need to Check : Signed in at ({x2}, {y2})")
+            else:
+                output = "error"
+                add_confirmation(log_out, f"Error : Signed in at ({x2}, {y2})")
             log_out.distance = output
 
         if not log_in:
@@ -291,6 +295,13 @@ def check_distance(update, context):
 
         log_out.save()
 
+
+def add_confirmation(log_out, text):
+
+    if log_out.confirmation:
+        log_out.confirmation += "\n" + text
+    else:
+        log_out.confirmation = text
 
 @log_info()
 def ask_content(update, context):

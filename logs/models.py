@@ -21,11 +21,11 @@ class Log(core_models.TimeStampedModel):
     optional_status = models.CharField(max_length=100, null=True, blank=True)
     longitude = models.CharField(max_length=100, null=True, blank=True)
     latitude = models.CharField(max_length=100, null=True, blank=True)
+    distance = models.CharField(max_length=100, null=True, blank=True)
+    confirmation = models.TextField(null=True, blank=True)    
     remarks = models.TextField(null=True, blank=True)
-    confirmation = models.CharField(max_length=100, null=True, blank=True)
     edit_history = models.TextField(null=True, blank=True)
-    distance = models.TextField(max_length=100, null=True, blank=True)
-
+    
     def __str__(self):
         return f"No.{self.id} : {self.local_date()} | {self.member_fk} | {self.status}"
 

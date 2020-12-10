@@ -27,6 +27,7 @@ def check_distance(log):
 
             if x1 == "Not Available" or x2 == "Not Available":
                 output = "Not Available"
+                add_confirmation(log_out, f"Not Available : Signed in at ({x2}, {y2})")
             elif x1 and y1 and x2 and y2:
                 x1, y1 = map(float, (x1, y1))
                 x2, y2 = map(float, (x2, y2))
@@ -35,14 +36,24 @@ def check_distance(log):
                     output = "OK"
                 else:
                     output = "Need to Check"
+                    add_confirmation(log_out, f"Need to Check : Signed in at ({x2}, {y2})")
             else:
                 output = "error"
+                add_confirmation(log_out, f"Error : Signed in at ({x2}, {y2})")
             log_out.distance = output
 
         if not log_in:
             log_out.distance = "No Log in"
 
         log_out.save()
+
+
+def add_confirmation(log_out, text):
+
+    if log_out.confirmation:
+        log_out.confirmation += "\n" + text
+    else:
+        log_out.confirmation = text
 
 
 for log in Log.objects.all():
