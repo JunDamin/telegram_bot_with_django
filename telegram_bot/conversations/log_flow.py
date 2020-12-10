@@ -275,20 +275,20 @@ def check_distance(update, context):
 
             if x1 == "Not Available" or x2 == "Not Available":
                 output = "Not Available"
-                add_confirmation(log_out, f"Not Available : Signed in at ({x2}, {y2})")
+                add_confirmation(log_out, f"Not Available : Signed in at ({x2}, {y2}) signed out at ({x1}, {y1})")
             elif x1 and y1 and x2 and y2:
                 x1, y1 = map(float, (x1, y1))
                 x2, y2 = map(float, (x2, y2))
                 distance = sqrt((x1-x2)**2 + (y1-y2)**2)
                 if distance < 0.003:
                     output = "OK"
-                    add_confirmation(log_out, f"OK : Signed in at ({x2}, {y2})")
+                    add_confirmation(log_out, f"OK : Signed in at ({x2}, {y2}) signed out at ({x1}, {y1})")
                 else:
                     output = "Need to Check"
-                    add_confirmation(log_out, f"Need to Check : Signed in at ({x2}, {y2})")
+                    add_confirmation(log_out, f"Need to Check : Signed in at ({x2}, {y2}) signed out at ({x1}, {y1})")
             else:
                 output = "error"
-                add_confirmation(log_out, f"Error : Signed in at ({x2}, {y2})")
+                add_confirmation(log_out, f"Error : Signed in at ({x2}, {y2}) signed out at ({x1}, {y1})")
             log_out.distance = output
 
         if not log_in:
