@@ -1,4 +1,5 @@
 import re
+from math import sqrt
 from features.log import log_info
 from features.data_IO import (
     register_office,
@@ -246,6 +247,9 @@ def ask_log_confirmation(update, context):
 def receive_log_confirmation(update, context):
     choices = {"Confirm": True, "Edit": False}
     answer = choices.get(update.message.text)
+
+    check_distance(update, context)
+
     if answer:
         put_confirmation(update, context)
         context.user_data.clear()
@@ -254,6 +258,38 @@ def receive_log_confirmation(update, context):
         return -1
     else:
         return ask_optional_status(update, context)
+
+
+def check_distance(update, context):
+    session = context.user_data.get("session")
+
+    if session == "signing out":
+        # set variable
+        member = get_or_register_user(update.message.chat, update.message.from_user)
+
+        log_out = get_or_none_log_of_date(member, update.message.date.date(), session)
+        log_in = get_or_none_log_of_date(member, update.message.date.date(), "signing in")
+
+        if log_out and log_in:
+            x1, y1 = log_out.longitude, log_out.latitude
+            x2, y2 = log_in.longitude, log_in.latitude
+
+            if x1 == "Not Available" or x2 == "Not Available":
+                output = "Not Available"
+            else:
+                x1, y1 = map(float, (x1, y1))
+                x2, y2 = map(float, (x2, y2))
+                distance = sqrt((x1-x2)**2 + (y1-y2)**2)
+                if distance < 0.001:
+                    output = "OK"
+                else:
+                    output = "Need to Check"
+            log_out.distance = output
+
+        if not log_in:
+            log_out.distance = "No Log in"
+
+        log_out.save()
 
 
 @log_info()
@@ -275,7 +311,7 @@ def ask_content_confirmation(update, context):
     text_message = CHECK_CONTENT_TEXT.format(answer=answer)
     keyboard = CHECK_CONTENT_KEYBOARD
     reply_markdown(update, context, text_message, keyboard)
-
+            
     return ASK_CONTENT_CONFIRMATION
 
 

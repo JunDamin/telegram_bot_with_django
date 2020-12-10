@@ -82,10 +82,8 @@ class LogAdmin(ImportExportMixin, ExportActionMixin, admin.ModelAdmin):
         "local_time",
         "status",
         "optional_status",
-        "longitude",
-        "latitude",
+        "distance",
         "remarks",
-        "confirmation",
         "edit_history",
         "content",
     )
@@ -95,6 +93,7 @@ class LogAdmin(ImportExportMixin, ExportActionMixin, admin.ModelAdmin):
         ("timestamp", DateRangeFilter),
         StatusListFilter,
         MemberListFilter,
+        "distance",
     )
 
 
