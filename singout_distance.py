@@ -31,7 +31,7 @@ def check_distance(log):
                 x1, y1 = map(float, (x1, y1))
                 x2, y2 = map(float, (x2, y2))
                 distance = sqrt((x1-x2)**2 + (y1-y2)**2)
-                if distance < 0.001:
+                if distance < 0.003:
                     output = "OK"
                 else:
                     output = "Need to Check"
