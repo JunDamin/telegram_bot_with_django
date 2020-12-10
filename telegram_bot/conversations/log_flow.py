@@ -270,8 +270,8 @@ def check_distance(update, context):
         log_in = get_or_none_log_of_date(member, update.message.date.date(), "signing in")
 
         if log_out and log_in:
-            x1, y1 = log_out.longitude, log_out.latitude
-            x2, y2 = log_in.longitude, log_in.latitude
+            x1, y1 = log_out.latitude, log_out.longitude
+            x2, y2 = log_in.latitude, log_in.longitude
 
             if x1 == "Not Available" or x2 == "Not Available":
                 output = "Not Available"
@@ -282,6 +282,7 @@ def check_distance(update, context):
                 distance = sqrt((x1-x2)**2 + (y1-y2)**2)
                 if distance < 0.003:
                     output = "OK"
+                    add_confirmation(log_out, f"OK : Signed in at ({x2}, {y2})")
                 else:
                     output = "Need to Check"
                     add_confirmation(log_out, f"Need to Check : Signed in at ({x2}, {y2})")
