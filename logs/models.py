@@ -32,6 +32,9 @@ class Log(core_models.TimeStampedModel):
     def local_date(self):
         return self.timestamp.astimezone(self.member_fk.office_fk.office_timezone).strftime("%Y.%m.%d")
 
+    def local_weekday(self):
+        return self.timestamp.astimezone(self.member_fk.office_fk.office_timezone).strftime("%A")   
+
     def local_time(self):
         return self.timestamp.astimezone(self.member_fk.office_fk.office_timezone).strftime("%H:%M")
 

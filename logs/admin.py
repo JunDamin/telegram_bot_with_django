@@ -26,6 +26,7 @@ class MemberListFilter(MultipleChoiceListFilter):
 
 class LogResource(resources.ModelResource):
     local_datetime = Field()
+    local_weekday = Field()
 
     class Meta:
         model = models.Log
@@ -35,6 +36,7 @@ class LogResource(resources.ModelResource):
             "member_fk__first_name",
             "member_fk__last_name",
             "local_datetime",
+            "local_weekday",
             "status",
             "optional_status",
             "longitude",
@@ -49,6 +51,7 @@ class LogResource(resources.ModelResource):
             "member_fk__first_name",
             "member_fk__last_name",
             "local_datetime",
+            "local_weekday",
             "status",
             "optional_status",
             "longitude",
@@ -61,6 +64,8 @@ class LogResource(resources.ModelResource):
     def dehydrate_local_datetime(self, log):
         return "%s %s" % (log.local_date(), log.local_time())
 
+    def dehydrate_local_weekday(self, log):
+        return "%s" % log.local_weekday()
 
 
 class ContentInline(admin.TabularInline):
@@ -80,6 +85,7 @@ class LogAdmin(ImportExportMixin, ExportActionMixin, admin.ModelAdmin):
         "member_fk",
         "local_date",
         "local_time",
+        "local_weekday",
         "status",
         "optional_status",
         "distance",
