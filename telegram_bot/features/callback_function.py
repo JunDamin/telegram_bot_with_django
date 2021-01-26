@@ -23,7 +23,10 @@ from staff.models import Member
 def start(update, context):
     chat = update.message.chat
     if chat.type == "private":
-        update.message.reply_text("Only in Group chat!")
+        update.message.reply_text(
+            "you have been authorized!\n"
+            + 'Please "sign in" again in group chat and touch "delete and rewrite the log" button in private message.'
+        )
         return None
     register_office(chat)
     update.message.reply_text("Office registered!")
