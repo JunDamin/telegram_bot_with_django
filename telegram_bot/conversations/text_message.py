@@ -85,7 +85,7 @@ optional_status_message = {
 
 optional_status_keyboard = {
     "signing in": [
-        ["Office", "Home"],
+        ["Office", "Home", "Business Trip"],
     ],
     "signing out": [
         [
