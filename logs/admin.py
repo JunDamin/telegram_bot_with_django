@@ -28,7 +28,8 @@ class MemberListFilter(MultipleChoiceListFilter):
 
 
 class LogResource(resources.ModelResource):
-    local_datetime = Field()
+    local_date = Field()
+    local_time = Field()
     local_weekday = Field()
 
     class Meta:
@@ -38,7 +39,8 @@ class LogResource(resources.ModelResource):
             "member_fk",
             "member_fk__first_name",
             "member_fk__last_name",
-            "local_datetime",
+            "local_date",
+            "local_time",
             "local_weekday",
             "status",
             "optional_status",
@@ -53,7 +55,8 @@ class LogResource(resources.ModelResource):
             "member_fk",
             "member_fk__first_name",
             "member_fk__last_name",
-            "local_datetime",
+            "local_date",
+            "local_time",
             "local_weekday",
             "status",
             "optional_status",
@@ -64,8 +67,11 @@ class LogResource(resources.ModelResource):
             "edit_history",
         )
 
-    def dehydrate_local_datetime(self, log):
-        return "%s %s" % (log.local_date(), log.local_time())
+    def dehydrate_local_date(self, log):
+        return log.local_date()
+
+    def dehydrate_local_time(self, log):
+        return log.local_time()
 
     def dehydrate_local_weekday(self, log):
         return "%s" % log.local_weekday()
