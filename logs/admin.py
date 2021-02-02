@@ -45,7 +45,6 @@ class LogResource(resources.ModelResource):
         return "%s %s" % (log.local_date(), log.local_time())
 
 
-
 class ContentInline(admin.TabularInline):
     model = models.WorkContent
     extra = 0
@@ -55,7 +54,10 @@ class ContentInline(admin.TabularInline):
 class LogAdmin(ImportExportMixin, ExportActionMixin, admin.ModelAdmin):
 
     """ Log Admin Definition """
-    inlines = [ContentInline, ]
+
+    inlines = [
+        ContentInline,
+    ]
     resource_class = LogResource
 
     list_display = (
@@ -94,3 +96,12 @@ class WorkContentAdmin(admin.ModelAdmin):
 
     list_filter = ("log_fk__status",)
 
+
+@admin.register(models.WorkingDay)
+class WorkingDayAdmin(admin.ModelAdmin):
+
+    """ Work Content Admin Definition """
+
+    list_display = ("date",)
+
+    list_filter = (("date", DateRangeFilter),)

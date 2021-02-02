@@ -3,6 +3,13 @@ from core import models as core_models
 from staff.models import Member
 
 
+class WorkingDay(core_models.TimeStampedModel):
+    date = models.DateField()
+
+    def __str__(self):
+        return self.date.isoformat()
+
+
 class Log(core_models.TimeStampedModel):
 
     STATUS_SIGN_IN = "signing in"
@@ -24,6 +31,7 @@ class Log(core_models.TimeStampedModel):
     remarks = models.TextField(null=True, blank=True)
     confirmation = models.CharField(max_length=100, null=True, blank=True)
     edit_history = models.TextField(null=True, blank=True)
+    working_day = models.ForeignKey(WorkingDay, on_delete=models.PROTECT, related_name="log", null=True)
 
     def __str__(self):
         return f"No.{self.id} : {self.local_date()} | {self.member_fk} | {self.status}"
