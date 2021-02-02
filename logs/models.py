@@ -33,7 +33,6 @@ class Log(core_models.TimeStampedModel):
     remarks = models.TextField(null=True, blank=True)
     edit_history = models.TextField(null=True, blank=True)
     working_day = models.ForeignKey(WorkingDay, on_delete=models.PROTECT, related_name="log", null=True)
-
     
     def __str__(self):
         return f"No.{self.id} : {self.local_date()} | {self.member_fk} | {self.status}"
@@ -54,4 +53,13 @@ class Log(core_models.TimeStampedModel):
 class WorkContent(core_models.TimeStampedModel):
     log_fk = models.OneToOneField(Log, on_delete=models.CASCADE, related_name="work_content", null=True)
     content = models.TextField(null=True, blank=True)
+    remarks = models.TextField(null=True, blank=True)
+
+
+class Leave(core_models.TimeStampedModel):
+    member_fk = models.ForeignKey(Member, on_delete=models.PROTECT, related_name='leave')
+    start_date = models.DateField()
+    end_date = models.DateField()
+    leave_days = models.IntegerField()
+    confirmed = models.BooleanField(default=False)
     remarks = models.TextField(null=True, blank=True)
