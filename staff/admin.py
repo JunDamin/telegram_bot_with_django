@@ -30,6 +30,9 @@ class MemberAdmin(admin.ModelAdmin):
         "koica_id",
         "office_fk",
         "is_active",
+        "full_name",
+        "used_leave_in_this_year",
+        "used_leave_of_last_year",
     )
 
     list_filter = ("is_active",)

@@ -61,5 +61,20 @@ class Leave(core_models.TimeStampedModel):
     start_date = models.DateField()
     end_date = models.DateField()
     leave_days = models.IntegerField()
+    working_days = models.ManyToManyField(WorkingDay, related_name="leave", null=True)
     confirmed = models.BooleanField(default=False)
     remarks = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.start_date.isoformat()} - {self.end_date.isoformat()}"
+
+
+class HalfDayOff(core_models.TimeStampedModel):
+    date = models.DateField()
+    off_hour = models.IntegerField()
+    working_day = models.ManyToManyField(WorkingDay, related_name="half_day_off", null=True)
+    confirmed = models.BooleanField(default=False)
+    remarks = models.TextField(null=True, blank=True)
+
+    def leave_days(self):
+        return self.off_hour / 8

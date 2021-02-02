@@ -4,24 +4,27 @@ from import_export import resources
 from import_export.admin import ImportExportMixin, ExportActionMixin
 from import_export.fields import Field
 from import_export.widgets import DateTimeWidget
-from django_admin_multiple_choice_list_filter.list_filters import MultipleChoiceListFilter
+from django_admin_multiple_choice_list_filter.list_filters import (
+    MultipleChoiceListFilter,
+)
 from . import models
 from staff import models as staff_models
 
+
 class StatusListFilter(MultipleChoiceListFilter):
-    title = 'Status'
-    parameter_name = 'status__in'
+    title = "Status"
+    parameter_name = "status__in"
 
     def lookups(self, requests, modle_admin):
         return models.Log.STATUS_CHOICES
 
 
 class MemberListFilter(MultipleChoiceListFilter):
-    title = 'Member'
-    parameter_name = 'member_fk__in'
+    title = "Member"
+    parameter_name = "member_fk__in"
 
     def lookups(self, requests, modle_admin):
-        return staff_models.Member.objects.values_list('pk', 'first_name')
+        return staff_models.Member.objects.values_list("pk", "first_name")
 
 
 class LogResource(resources.ModelResource):
@@ -67,6 +70,7 @@ class LogResource(resources.ModelResource):
     def dehydrate_local_weekday(self, log):
         return "%s" % log.local_weekday()
 
+
 class ContentInline(admin.TabularInline):
     model = models.WorkContent
     extra = 0
@@ -111,7 +115,7 @@ class WorkContentAdmin(admin.ModelAdmin):
     """ Work Content Admin Definition """
 
     list_display = (
-        "id", 
+        "id",
         "log_fk",
         "content",
         "remarks",
@@ -128,3 +132,17 @@ class WorkingDayAdmin(admin.ModelAdmin):
     list_display = ("date",)
 
     list_filter = (("date", DateRangeFilter),)
+
+
+@admin.register(models.Leave)
+class LeaveAdmin(admin.ModelAdmin):
+
+    """ Work Content Admin Definition """
+    filter_horizontal = ("working_days", )
+
+    list_display = ("member_fk", "start_date", "end_date", "leave_days", "confirmed")
+
+    list_filter = (
+        ("start_date", DateRangeFilter),
+        ("end_date", DateRangeFilter),
+    )
