@@ -48,7 +48,7 @@ PROJECT_APPS = [
     'staff.apps.StaffConfig',
 ]
 
-THIRD_PARTY_APPS = ['import_export', 'rangefilter']
+THIRD_PARTY_APPS = ['import_export', 'rangefilter', 'django_admin_multiple_choice_list_filter',]
 
 INSTALLED_APPS = DJANGO_APPS + PROJECT_APPS + THIRD_PARTY_APPS
 

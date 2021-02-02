@@ -228,9 +228,9 @@ def put_location(location, user_data):
     return True
 
 
-def put_confirmation(update, context):
+def put_confirmation(update, context, postfix=""):
     log = Log.objects.get(id=context.user_data.get("log_id"))
-    log.confirmation = "user confirmed"
+    log.confirmation = "user confirmed " + postfix
     log.save()
 
 

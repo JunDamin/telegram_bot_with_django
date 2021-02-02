@@ -4,11 +4,29 @@ from import_export import resources
 from import_export.admin import ImportExportMixin, ExportActionMixin
 from import_export.fields import Field
 from import_export.widgets import DateTimeWidget
+from django_admin_multiple_choice_list_filter.list_filters import MultipleChoiceListFilter
 from . import models
+from staff import models as staff_models
+
+class StatusListFilter(MultipleChoiceListFilter):
+    title = 'Status'
+    parameter_name = 'status__in'
+
+    def lookups(self, requests, modle_admin):
+        return models.Log.STATUS_CHOICES
+
+
+class MemberListFilter(MultipleChoiceListFilter):
+    title = 'Member'
+    parameter_name = 'member_fk__in'
+
+    def lookups(self, requests, modle_admin):
+        return staff_models.Member.objects.values_list('pk', 'first_name')
 
 
 class LogResource(resources.ModelResource):
     local_datetime = Field()
+    local_weekday = Field()
 
     class Meta:
         model = models.Log
@@ -18,6 +36,7 @@ class LogResource(resources.ModelResource):
             "member_fk__first_name",
             "member_fk__last_name",
             "local_datetime",
+            "local_weekday",
             "status",
             "optional_status",
             "longitude",
@@ -32,6 +51,7 @@ class LogResource(resources.ModelResource):
             "member_fk__first_name",
             "member_fk__last_name",
             "local_datetime",
+            "local_weekday",
             "status",
             "optional_status",
             "longitude",
@@ -44,6 +64,8 @@ class LogResource(resources.ModelResource):
     def dehydrate_local_datetime(self, log):
         return "%s %s" % (log.local_date(), log.local_time())
 
+    def dehydrate_local_weekday(self, log):
+        return "%s" % log.local_weekday()
 
 class ContentInline(admin.TabularInline):
     model = models.WorkContent
@@ -65,12 +87,11 @@ class LogAdmin(ImportExportMixin, ExportActionMixin, admin.ModelAdmin):
         "member_fk",
         "local_date",
         "local_time",
+        "local_weekday",
         "status",
         "optional_status",
-        "longitude",
-        "latitude",
+        "distance",
         "remarks",
-        "confirmation",
         "edit_history",
         "content",
     )
@@ -78,8 +99,9 @@ class LogAdmin(ImportExportMixin, ExportActionMixin, admin.ModelAdmin):
     list_filter = (
         "timestamp",
         ("timestamp", DateRangeFilter),
-        "status",
-        "optional_status",
+        StatusListFilter,
+        MemberListFilter,
+        "distance",
     )
 
 
@@ -89,6 +111,7 @@ class WorkContentAdmin(admin.ModelAdmin):
     """ Work Content Admin Definition """
 
     list_display = (
+        "id", 
         "log_fk",
         "content",
         "remarks",
