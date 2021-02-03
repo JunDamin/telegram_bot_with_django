@@ -28,7 +28,6 @@ class MemberListFilter(MultipleChoiceListFilter):
 
 
 class LogResource(resources.ModelResource):
-    local_date = Field()
     local_time = Field()
     local_weekday = Field()
 
@@ -39,7 +38,7 @@ class LogResource(resources.ModelResource):
             "member_fk",
             "member_fk__first_name",
             "member_fk__last_name",
-            "local_date",
+            "working_day__date",
             "local_time",
             "local_weekday",
             "status",
@@ -55,7 +54,7 @@ class LogResource(resources.ModelResource):
             "member_fk",
             "member_fk__first_name",
             "member_fk__last_name",
-            "local_date",
+            "working_day__date",
             "local_time",
             "local_weekday",
             "status",
@@ -66,9 +65,6 @@ class LogResource(resources.ModelResource):
             "confirmation",
             "edit_history",
         )
-
-    def dehydrate_local_date(self, log):
-        return log.local_date()
 
     def dehydrate_local_time(self, log):
         return log.local_time()
@@ -95,7 +91,7 @@ class LogAdmin(ImportExportMixin, ExportActionMixin, admin.ModelAdmin):
     list_display = (
         "id",
         "member_fk",
-        "local_date",
+        "working_day",
         "local_time",
         "local_weekday",
         "status",
@@ -144,9 +140,17 @@ class WorkingDayAdmin(admin.ModelAdmin):
 class LeaveAdmin(admin.ModelAdmin):
 
     """ Work Content Admin Definition """
-    filter_horizontal = ("working_days", )
+    fieldsets = (
+        ("basic", {
+            'fields': ('start_date', 'end_date', 'leave_days')
+        }),
+        ('Advanced options', {
+            'classes': ('collapse',),
+            'fields': ('confirmed',),
+        }),
+    )
 
-    list_display = ("member_fk", "start_date", "end_date", "leave_days", "confirmed")
+    list_display = ("member_fk", "start_date", "end_date", "leave_days", "used_day", "confirmed")
 
     list_filter = (
         ("start_date", DateRangeFilter),
