@@ -7,6 +7,9 @@ from common_parts import (
     get_reply_of_message_of_id,
     erase_log,
     check_assert_with_qna,
+    chat_room_id,
+    bot_id,
+    sleep_time,
 )
 
 
@@ -14,11 +17,6 @@ from common_parts import (
 api_id = int(os.environ["APP_ID"])
 api_hash = os.environ["APP_HASH"]
 session_str = os.environ["SESSION"]
-
-# constant variable
-chat_room_id = -444903176
-bot_id = "@KOICA_test_bot"
-sleep_time = 0.5
 
 
 @pytest.mark.asyncio
