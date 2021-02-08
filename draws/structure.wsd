@@ -1,0 +1,7 @@
+@startuml Chat Bot Structure
+
+Chat --> Office
+Staff --> Office
+Staff <-- Log
+
+@enduml

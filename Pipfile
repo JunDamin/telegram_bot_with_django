@@ -20,6 +20,7 @@ django-timezone-field = "*"
 django-import-export = "*"
 django-admin-rangefilter = "*"
 django-admin-multiple-choice-list-filter = "*"
+python-telegram-bot-calendar = "*"
 
 [requires]
 python_version = "3.8"
