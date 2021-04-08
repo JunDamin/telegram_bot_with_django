@@ -49,7 +49,6 @@ def reply_markdown(update, context, text_message, reply_keyboard=False):
             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
             if reply_keyboard
             else ReplyKeyboardRemove(),
-            parse_mode=ParseMode.MARKDOWN_V2,
         )
 
 

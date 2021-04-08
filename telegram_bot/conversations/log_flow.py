@@ -63,8 +63,9 @@ def reply_initiation(update, context):
 
     # set session and log
     status = set_session(update, context)
-
-    log = get_or_none_log_of_date(member, update.message.date.date(), status)
+    message_datetime = update.message.date
+    late = is_late(update, context)
+    log = get_or_none_log_of_date(member, message_datetime.date(), status)
     is_new = False if log else True
     if is_new:
         log = save_log(member, update.message.date, status)
@@ -72,6 +73,11 @@ def reply_initiation(update, context):
 
     # make text by session
     text = init_group_message.get(status)
+
+    # Make a branch
+    if late:
+        text += "\nYou have been late"
+
     reply_message = (
         text.format(
             first_name=user.first_name, log_id=log.id, report_time=log.local_time()
@@ -86,9 +92,26 @@ def reply_initiation(update, context):
         reply_message,
     )
     return (
-        ask_optional_status(update, context)
+        (
+            ask_optional_status(update, context)
+            if not late
+            else ask_reason(update, context)
+        )
         if is_new
         else ask_overwrite(update, context)
+    )
+
+
+def is_late(update, context):
+    message_datetime = update.message.date
+    status = set_session(update, context)
+    chat = update.message.chat
+    user = update.message.from_user
+    member = get_or_register_user(chat, user)
+    open_time = member.office_fk.open_time
+    return (
+        status == "signing in"
+        and message_datetime.astimezone(member.office_fk.timezone).time() > open_time
     )
 
 
@@ -111,6 +134,33 @@ def set_session(update, context):
 
 def clear_session(udpate, context):
     context.user_data.clear()
+
+
+def ask_reason(update, context):
+    log = get_log_by_id(context.user_data.get("log_id"))
+    send_markdown(
+        update,
+        context,
+        log.member_fk.id,
+        "You have been late! \nCan you text me the reason you late?",
+        [["Ok. I will send you the reason"]],
+    )
+    return ASK_OVERWRITE
+
+
+def ask_texting_reason(update, context):
+    text_message = "Please text me the reason."
+    reply_markdown(update, context, text_message)
+    return "RECEIVE_REASON"
+
+
+def save_reason(update, context):
+    text = update.message.text
+    log = get_log_by_id(context.user_data.get("log_id"))
+    remarks_text = (log.remarks + "\n") if log.remarks else ""
+    log.remarks = f"(late) {remarks_text}{text}"
+    log.save()
+    return ask_optional_status(update, context)
 
 
 @log_info()
@@ -165,7 +215,11 @@ def receive_overwrite_confirmation(update, context):
     reply_markdown(update, context, text_message)
     log = save_log(member, update.message.date, session)
     context.user_data["log_id"] = log.id
-    return ask_optional_status(update, context)
+    return (
+        ask_optional_status(update, context)
+        if is_late(update, context)
+        else ask_reason(update, context)
+    )
 
 
 @log_info()

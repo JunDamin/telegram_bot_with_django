@@ -99,7 +99,7 @@ def save_log(member, timestamp, status):
         member_fk=member,
         timestamp=timestamp,
         status=status,
-        working_day=working_day
+        working_day=working_day,
     )
     log.save()
 

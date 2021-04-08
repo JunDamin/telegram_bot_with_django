@@ -13,7 +13,7 @@ def public_only(func):
     def wrapper(*args, **kwargs):
         chat_type = args[0].message.chat.type
         print(chat_type)
-        if chat_type == "group":
+        if chat_type in ["group", "supergroup"]:
             return func(*args, **kwargs)
         else:
             args[0].message.reply_text("please send in the group chat")

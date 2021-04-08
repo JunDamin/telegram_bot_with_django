@@ -6,12 +6,15 @@ from staff.models import Member
 
 class WorkingDay(core_models.TimeStampedModel):
     date = models.DateField(unique=True)
+    offday = models.BooleanField(default=False)
 
     def __str__(self):
         return self.date.isoformat()
 
     def save(self, *args, **kwargs):
         super(WorkingDay, self).save(*args, **kwargs)
+        if self.offday:
+            return None
         Q = models.Q
         leaves = Leave.objects.filter(
             Q(start_date__lte=self.date) & Q(end_date__gte=self.date)
@@ -66,17 +69,17 @@ class Log(core_models.TimeStampedModel):
 
     def local_date(self):
         return self.timestamp.astimezone(
-            self.member_fk.office_fk.office_timezone
+            self.member_fk.office_fk.timezone
         ).strftime("%Y.%m.%d")
 
     def local_weekday(self):
         return self.timestamp.astimezone(
-            self.member_fk.office_fk.office_timezone
+            self.member_fk.office_fk.timezone
         ).strftime("%A")
 
     def local_time(self):
         return self.timestamp.astimezone(
-            self.member_fk.office_fk.office_timezone
+            self.member_fk.office_fk.timezone
         ).strftime("%H:%M")
 
     def content(self):
@@ -130,7 +133,7 @@ class Leave(core_models.TimeStampedModel):
                 working_day=day,
             )
             log.save()
-            
+
         # Delete wrong record
 
         wrong_logs = Log.objects.filter(
@@ -148,17 +151,23 @@ class Leave(core_models.TimeStampedModel):
         wrong_logs.delete()
 
     def used_day(self):
-        return len(self.working_days.all())
+        return len(self.working_days.filter(offday=False))
 
 
 class HalfDayOff(core_models.TimeStampedModel):
     date = models.DateField()
-    off_hour = models.IntegerField()
+    start = models.TimeField()
+    end = models.TimeField()
     working_day = models.ManyToManyField(
         WorkingDay, related_name="half_day_off", null=True
     )
     confirmed = models.BooleanField(default=False)
     remarks = models.TextField(null=True, blank=True)
 
-    def leave_days(self):
-        return self.off_hour / 8
+    def used_day(self):
+        used_hour = get_off_hour(self.start, self.end) / 8
+        return used_hour if used_hour < 1 else 1
+
+
+def get_off_hour(start, end):
+    return end.hour - start.hour + (end.minute - start.minute) / 60

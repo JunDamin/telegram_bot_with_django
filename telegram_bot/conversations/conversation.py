@@ -96,6 +96,24 @@ log_flow_conv = ConversationHandler(
     allow_reentry=True,
 )
 
+# get reason to late
+
+set_get_reason_conv = ConversationHandler(
+    entry_points=[
+        MessageHandler(
+            Filters.regex("^Ok. I will send you the reason$"), private_only(log_flow.ask_texting_reason)
+        )
+    ],
+    states={
+         "RECEIVE_REASON": [
+            MessageHandler(Filters.text & Filters.private, log_flow.save_reason),
+        ],
+    },
+    fallbacks=[MessageHandler(Filters.regex("^SKIP$"), cancel)],
+    map_to_parent={},
+    allow_reentry=True,
+)
+
 # set remarks
 
 set_remarks_conv = ConversationHandler(
@@ -180,4 +198,5 @@ conversation_handlers = (
     edit_log_conv,
     cancel_handler,
     leave_flow_conv,
+    set_get_reason_conv,
 )

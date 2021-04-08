@@ -7,6 +7,7 @@ import datetime
 import json
 import calendar
 
+
 # callback data shouldn't be longer than 64(?) characters
 def create_callback_data(action="IGNORE", data=None):
     """ Create the callback data associated to each button"""
@@ -134,29 +135,59 @@ def process_calendar_selection(update, context):
 def input_annual_leave(update, context):
     """getting input annual leave"""
 
-    ret_data = (False, None)
     query = update.callback_query
     (action, data) = separate_callback_data(query.data)
+    year, month, day = data
+    curr = datetime.datetime(int(year), int(month), 1)
+    year, month, day = map(int, (year, month, day))
+    if action == "IGNORE":
+        update.answer_callback_query(callback_query_id=query.id)
+    elif action == "SELECT_DAY":
+        ret_data = True, datetime.datetime(year, month, day)
+    elif action == "PREV-MONTH":
+        pre = curr - datetime.timedelta(days=1)
+        query.edit_message_text(
+            text=query.message.text,
+            reply_markup=create_calendar(int(pre.year), int(pre.month)),
+        )
+    elif action == "NEXT-MONTH":
+        ne = curr + datetime.timedelta(days=31)
+        query.edit_message_text(
+            text=query.message.text,
+            reply_markup=create_calendar(int(ne.year), int(ne.month)),
+        )
+    else:
+        query.edit_message_text(
+            callback_query_id=query.id, text="Something went wrong!"
+        )
+        # UNKNOWN
+    update.callback_query.answer()
+    return ret_data
 
 
-def create_leave_form(
-    flow, start_date: datetime.datetime, end_date: datetime.datetime
-) -> InlineKeyboardMarkup:
+def create_leave_form(start_date: str, end_date: str) -> InlineKeyboardMarkup:
 
-    date_one = start_date.isoformat() if start_date else "Start Date"
-    date_two = end_date.isoformat() if end_date else "End Date"
+    date_one = start_date if start_date else "Start Date"
+    date_two = end_date if end_date else "End Date"
 
-    start_date = start_date if start_date else datetime.date.today()
-    end_date = end_date if end_date else datetime.date.today()
+    start = (
+        datetime.datetime.fromisoformat(start_date)
+        if start_date
+        else datetime.date.today()
+    )
+    end = (
+        datetime.datetime.fromisoformat(end_date) if end_date else datetime.date.today()
+    )
 
     keyboard = []
+    # Set Datepicker
     first_row = []
     first_row.append(
         InlineKeyboardButton(
             text=date_one,
             callback_data=create_callback_data(
-                "DATEPICK",
-                (start_date.year, start_date.month, start_date.day),
+                "START_DATE",
+                (start.year, start.month, start.day),
             ),
         )
     )
@@ -164,12 +195,16 @@ def create_leave_form(
         InlineKeyboardButton(
             text=date_two,
             callback_data=create_callback_data(
-                "DATEPICK",
-                (end_date.year, end_date.month, end_date.day),
+                "END_DATE",
+                (end.year, end.month, end.day),
             ),
         )
     )
     keyboard.append(first_row)
+
+    # check whether date is added
+    if not start_date and not end_date:
+        return InlineKeyboardMarkup(keyboard)
 
     second_row = []
     if start_date <= end_date:
@@ -181,7 +216,8 @@ def create_leave_form(
     elif start_date > end_date:
         second_row.append(
             InlineKeyboardButton(
-                text="End date should be later than start date", callback_data="None"
+                text="End date should be later than start date",
+                callback_data=create_callback_data("IGNORE"),
             )
         )
     else:
