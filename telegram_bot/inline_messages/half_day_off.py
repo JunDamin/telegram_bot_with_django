@@ -1,14 +1,13 @@
 from datetime import time, date
 from telegram.ext import (
-    Updater,
     CallbackQueryHandler,
     CommandHandler,
     ConversationHandler,
     CallbackContext,
 )
-from telegram import ReplyKeyboardRemove, Update
+from telegram import Update
 
-from logs.models import WorkingDay, HalfDayOff
+from logs.models import HalfDayOff
 from staff.models import Member
 from inline_messages.telegramcalendar import (
     process_half_day_off,
@@ -17,7 +16,7 @@ from inline_messages.telegramcalendar import (
 )
 
 
-SELECT_OPTION, = map(chr, range(3))
+SELECT_OPTION = "SELECT_OPTION"
 
 
 def start(update, context):
@@ -66,6 +65,7 @@ def inline_handler(update, context):
         update.callback_query.edit_message_text(
             text=text,
         )
+        context.user_data.clear()
         return ConversationHandler.END
     return SELECT_OPTION
 
@@ -80,5 +80,7 @@ half_day_off_conv = ConversationHandler(
 
 
 def save_halfdayoff(member_fk, offdate, start, end, confirmed=True) -> None:
-    dayoff = HalfDayOff(member_fk=member_fk, date=offdate, start=start, end=end, confirmed=confirmed)
+    dayoff = HalfDayOff(
+        member_fk=member_fk, date=offdate, start=start, end=end, confirmed=confirmed
+    )
     dayoff.save()

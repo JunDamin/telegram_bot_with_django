@@ -58,9 +58,7 @@ def create_calendar(year=None, month=None):
                 row.append(
                     InlineKeyboardButton(
                         str(day),
-                        callback_data=create_callback_data(
-                            "DAY", (year, month, day)
-                        ),
+                        callback_data=create_callback_data("DAY", (year, month, day)),
                     )
                 )
         keyboard.append(row)
@@ -114,7 +112,7 @@ def handle_cal_callback(update, context):
     (action, data) = separate_callback_data(query.data)
     year, month, day, curr = get_days(update, context)
     ret_data = (False, None)
-    
+
     print(action)
     if action == "IGNORE":
         update.answer_callback_query(callback_query_id=query.id)
@@ -163,7 +161,7 @@ def create_half_day_options(update, context):
         text = f"You choose {off_type} off on {date}"
         text += "\nIf it is correct, please press confirm button."
     else:
-        text = "Please the half day off type."
+        text = "please select the type"
 
     keyboard = [
         [
@@ -178,14 +176,13 @@ def create_half_day_options(update, context):
             InlineKeyboardButton(
                 text="Confirm", callback_data=create_callback_data("CONFIRM")
             )
-        ] if off_type and date else [
-            InlineKeyboardButton(
-                text="", callback_data=create_callback_data("IGNORE")
-            )
+        ]
+        if off_type and date
+        else [
+            InlineKeyboardButton(text="", callback_data=create_callback_data("IGNORE"))
         ],
     ]
     return text, InlineKeyboardMarkup(keyboard)
-
 
 
 def create_full_day_options(update, context):
@@ -193,7 +190,7 @@ def create_full_day_options(update, context):
 
     start_date = user_data.get("start_date")
     end_date = user_data.get("end_date")
-    
+
     if start_date and end_date:
         text = f"You choose {start_date} off on {end_date}"
         text += "\nIf it is correct, please press confirm button."
@@ -213,15 +210,13 @@ def create_full_day_options(update, context):
             InlineKeyboardButton(
                 text="Confirm", callback_data=create_callback_data("CONFIRM")
             )
-        ] if start_date and end_date else [
-            InlineKeyboardButton(
-                text="", callback_data=create_callback_data("IGNORE")
-            )
         ]
+        if start_date and end_date
+        else [
+            InlineKeyboardButton(text="", callback_data=create_callback_data("IGNORE"))
+        ],
     ]
     return text, InlineKeyboardMarkup(keyboard)
-
-
 
 
 def process_full_day_off(update, context):
@@ -245,9 +240,8 @@ def process_full_day_off(update, context):
 
     ret_data = handle_cal_callback(update, context)
     date_type = context.user_data.get("date_type")
-    
+
     if ret_data[0]:
         context.user_data[date_type] = ret_data[1].isoformat()
     update.callback_query.answer()
     return ret_data
-

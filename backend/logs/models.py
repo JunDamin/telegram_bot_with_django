@@ -13,7 +13,7 @@ class WorkingDay(core_models.TimeStampedModel):
 
     def save(self, *args, **kwargs):
         super(WorkingDay, self).save(*args, **kwargs)
-        if self.offday:
+        if self.isOffday:
             return None
         Q = models.Q
         leaves = Leave.objects.filter(
@@ -177,10 +177,13 @@ class HalfDayOff(core_models.TimeStampedModel):
         day = WorkingDay.objects.filter(Q(date=self.date))
         print(day)
         if day:
-            self.working_day = day[0]
+            day = day[0]
+            self.working_day = day
             log, _ = Log.objects.get_or_create(
                 member_fk=self.member_fk,
-                timestamp=timezone.datetime.combine(day.date, timezone.datetime.min.time()),
+                timestamp=timezone.datetime.combine(
+                    day.date, timezone.datetime.min.time()
+                ),
                 status="leave",
                 optional_status="Half Day",
                 longitude="Not Available",
@@ -189,7 +192,6 @@ class HalfDayOff(core_models.TimeStampedModel):
             )
             log.save()
         super(HalfDayOff, self).save(*args, **kwargs)
-
 
     def used_day(self):
         return 0.5
