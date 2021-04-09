@@ -6,7 +6,7 @@ from staff.models import Member
 
 class WorkingDay(core_models.TimeStampedModel):
     date = models.DateField(unique=True)
-    offday = models.BooleanField(default=False)
+    isOffday = models.BooleanField(default=False)
 
     def __str__(self):
         return self.date.isoformat()
@@ -68,19 +68,19 @@ class Log(core_models.TimeStampedModel):
         return f"No.{self.id} : {self.local_date()} | {self.member_fk} | {self.status}"
 
     def local_date(self):
-        return self.timestamp.astimezone(
-            self.member_fk.office_fk.timezone
-        ).strftime("%Y.%m.%d")
+        return self.timestamp.astimezone(self.member_fk.office_fk.timezone).strftime(
+            "%Y.%m.%d"
+        )
 
     def local_weekday(self):
-        return self.timestamp.astimezone(
-            self.member_fk.office_fk.timezone
-        ).strftime("%A")
+        return self.timestamp.astimezone(self.member_fk.office_fk.timezone).strftime(
+            "%A"
+        )
 
     def local_time(self):
-        return self.timestamp.astimezone(
-            self.member_fk.office_fk.timezone
-        ).strftime("%H:%M")
+        return self.timestamp.astimezone(self.member_fk.office_fk.timezone).strftime(
+            "%H:%M"
+        )
 
     def content(self):
         return f"No.{self.work_content.id}" if hasattr(self, "work_content") else "-"
@@ -155,18 +155,44 @@ class Leave(core_models.TimeStampedModel):
 
 
 class HalfDayOff(core_models.TimeStampedModel):
+    member_fk = models.ForeignKey(
+        Member, on_delete=models.PROTECT, related_name="half_day_off", null=True
+    )
     date = models.DateField()
     start = models.TimeField()
     end = models.TimeField()
-    working_day = models.ManyToManyField(
-        WorkingDay, related_name="half_day_off", null=True
+    working_day = models.ForeignKey(
+        WorkingDay,
+        related_name="half_day_off",
+        null=True,
+        on_delete=models.CASCADE,
     )
     confirmed = models.BooleanField(default=False)
     remarks = models.TextField(null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+        # Add working days
+        Q = models.Q
+        print(self.date)
+        day = WorkingDay.objects.filter(Q(date=self.date))
+        print(day)
+        if day:
+            self.working_day = day[0]
+            log, _ = Log.objects.get_or_create(
+                member_fk=self.member_fk,
+                timestamp=timezone.datetime.combine(day.date, timezone.datetime.min.time()),
+                status="leave",
+                optional_status="Half Day",
+                longitude="Not Available",
+                latitude="Not Available",
+                working_day=day,
+            )
+            log.save()
+        super(HalfDayOff, self).save(*args, **kwargs)
+
+
     def used_day(self):
-        used_hour = get_off_hour(self.start, self.end) / 8
-        return used_hour if used_hour < 1 else 1
+        return 0.5
 
 
 def get_off_hour(start, end):

@@ -130,9 +130,8 @@ class WorkContentAdmin(admin.ModelAdmin):
 class WorkingDayAdmin(admin.ModelAdmin):
 
     """ Work Content Admin Definition """
-
-    list_display = ("date",)
-
+    list_display = ('date',
+    "isOffday")
     list_filter = (("date", DateRangeFilter),)
 
 
@@ -156,3 +155,14 @@ class LeaveAdmin(admin.ModelAdmin):
         ("start_date", DateRangeFilter),
         ("end_date", DateRangeFilter),
     )
+
+
+@admin.register(models.HalfDayOff)
+class HalfDayOffAdmin(admin.ModelAdmin):
+
+    """ Work Content Admin Definition """
+
+    list_display = ("member_fk", "date", "start", "end", "used_day", "confirmed")
+
+    list_filter = (
+        ("date", DateRangeFilter),)
