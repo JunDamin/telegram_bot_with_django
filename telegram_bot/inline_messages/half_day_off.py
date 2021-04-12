@@ -20,8 +20,9 @@ SELECT_OPTION = "SELECT_OPTION"
 
 
 def start(update, context):
+    print("halfday")
     text, keyboard = create_half_day_options(update, context)
-    update.message.reply_text(
+    update.callback_query.edit_message_text(
         text=text,
         reply_markup=keyboard,
     )
@@ -63,7 +64,7 @@ def inline_handler(update, context):
 
 
 half_day_off_conv = ConversationHandler(
-    entry_points=[CommandHandler("halfdayoff", start)],
+    entry_points=[CallbackQueryHandler(inline_handler, pattern="^.*$")],
     states={
         SELECT_OPTION: [CallbackQueryHandler(inline_handler, pattern="^.*")],
     },

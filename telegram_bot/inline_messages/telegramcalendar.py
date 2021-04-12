@@ -3,7 +3,7 @@ Base methods for calendar keyboard creation and processing
 """
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from datetime import date, time, timedelta
+from datetime import date, timedelta
 import json
 import calendar
 
@@ -191,7 +191,7 @@ def create_full_day_options(update, context):
     start_date = user_data.get("Start date")
     end_date = user_data.get("End date")
     date_i = start_date if start_date else "Start Date"
-    date_f =  end_date if end_date else "End Date"
+    date_f = end_date if end_date else "End Date"
 
     print("checK", start_date and end_date, start_date, end_date)
     if start_date and end_date:

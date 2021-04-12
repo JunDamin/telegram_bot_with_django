@@ -16,12 +16,12 @@ from inline_messages.telegramcalendar import (
 )
 
 
-SELECT_OPTION, START_DATE, END_DATE = map(chr, range(3))
+SELECT_OPTION, START_DATE, END_DATE = map(lambda x: "f"+chr(x), range(3))
 
 
 def start(update, context):
     text, keyboard = create_full_day_options(update, context)
-    update.message.reply_text(
+    update.callback_query.edit_message_text(
         text=text,
         reply_markup=keyboard,
     )
@@ -75,7 +75,7 @@ def save_leave(member_fk, start_date, end_date, leave_days):
 
 
 annual_leave_conv = ConversationHandler(
-    entry_points=[CommandHandler("leave", start)],
+    entry_points=[CallbackQueryHandler(inline_handler, pattern="^.*$")],
     states={
         SELECT_OPTION: [CallbackQueryHandler(inline_handler, pattern="^.*")],
     },

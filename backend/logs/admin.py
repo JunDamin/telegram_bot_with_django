@@ -3,7 +3,6 @@ from rangefilter.filter import DateRangeFilter
 from import_export import resources
 from import_export.admin import ImportExportMixin, ExportActionMixin
 from import_export.fields import Field
-from import_export.widgets import DateTimeWidget
 from django_admin_multiple_choice_list_filter.list_filters import (
     MultipleChoiceListFilter,
 )
@@ -130,8 +129,8 @@ class WorkContentAdmin(admin.ModelAdmin):
 class WorkingDayAdmin(admin.ModelAdmin):
 
     """ Work Content Admin Definition """
-    list_display = ('date',
-    "isOffday")
+
+    list_display = ("date", "isOffday")
     list_filter = (("date", DateRangeFilter),)
 
 
@@ -139,17 +138,35 @@ class WorkingDayAdmin(admin.ModelAdmin):
 class LeaveAdmin(admin.ModelAdmin):
 
     """ Work Content Admin Definition """
+
     fieldsets = (
-        ("basic", {
-            'fields': ('leave_type', 'start_date', 'end_date', )
-        }),
-        ('Advanced options', {
-            'classes': ('collapse',),
-            'fields': ('confirmed',),
-        }),
+        (
+            "basic",
+            {
+                "fields": (
+                    "leave_type",
+                    "start_date",
+                    "end_date",
+                )
+            },
+        ),
+        (
+            "Advanced options",
+            {
+                "classes": ("collapse",),
+                "fields": ("confirmed",),
+            },
+        ),
     )
 
-    list_display = ("member_fk", "leave_type", "start_date", "end_date", "used_day", "confirmed")
+    list_display = (
+        "member_fk",
+        "leave_type",
+        "start_date",
+        "end_date",
+        "used_day",
+        "confirmed",
+    )
 
     list_filter = (
         ("start_date", DateRangeFilter),
