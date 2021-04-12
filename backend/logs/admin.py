@@ -141,7 +141,7 @@ class LeaveAdmin(admin.ModelAdmin):
     """ Work Content Admin Definition """
     fieldsets = (
         ("basic", {
-            'fields': ('start_date', 'end_date', 'leave_days')
+            'fields': ('leave_type', 'start_date', 'end_date', )
         }),
         ('Advanced options', {
             'classes': ('collapse',),
@@ -149,20 +149,9 @@ class LeaveAdmin(admin.ModelAdmin):
         }),
     )
 
-    list_display = ("member_fk", "start_date", "end_date", "leave_days", "used_day", "confirmed")
+    list_display = ("member_fk", "leave_type", "start_date", "end_date", "used_day", "confirmed")
 
     list_filter = (
         ("start_date", DateRangeFilter),
         ("end_date", DateRangeFilter),
     )
-
-
-@admin.register(models.HalfDayOff)
-class HalfDayOffAdmin(admin.ModelAdmin):
-
-    """ Work Content Admin Definition """
-
-    list_display = ("member_fk", "date", "start", "end", "used_day", "confirmed")
-
-    list_filter = (
-        ("date", DateRangeFilter),)

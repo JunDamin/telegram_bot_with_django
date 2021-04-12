@@ -1,16 +1,19 @@
-from datetime import time, date
+from datetime import date
 from telegram.ext import (
-    Updater,
     CallbackQueryHandler,
     CommandHandler,
     ConversationHandler,
     CallbackContext,
 )
-from logs.models import WorkingDay, Leave
+from logs.models import Leave
 from staff.models import Member
-from telegram import ReplyKeyboardRemove, Update
+from telegram import Update
 
-from inline_messages.telegramcalendar import create_full_day_options, process_full_day_off, separate_callback_data
+from inline_messages.telegramcalendar import (
+    create_full_day_options,
+    process_full_day_off,
+    separate_callback_data,
+)
 
 
 SELECT_OPTION, START_DATE, END_DATE = map(chr, range(3))
@@ -30,6 +33,7 @@ def stop(update: Update, _: CallbackContext) -> int:
     update.message.reply_text("Okay, bye.")
 
     return ConversationHandler.END
+
 
 # start_date end_date를 context에 저장하는 것
 def inline_handler(update, context):
@@ -53,7 +57,7 @@ def inline_handler(update, context):
         end_date = date.fromisoformat(end_date)
 
         leave_days = 1
-        
+
         save_leave(member, start_date, end_date, leave_days)
         update.callback_query.edit_message_text(
             text=text,
@@ -64,7 +68,9 @@ def inline_handler(update, context):
 
 
 def save_leave(member_fk, start_date, end_date, leave_days):
-    annual_leave = Leave(member_fk=member_fk, start_date=start_date, end_date=end_date, leave_days=leave_days)
+    annual_leave = Leave(
+        member_fk=member_fk, leave_type="Full", start_date=start_date, end_date=end_date
+    )
     annual_leave.save()
 
 
@@ -72,6 +78,6 @@ annual_leave_conv = ConversationHandler(
     entry_points=[CommandHandler("leave", start)],
     states={
         SELECT_OPTION: [CallbackQueryHandler(inline_handler, pattern="^.*")],
-        },
+    },
     fallbacks=[CommandHandler("stop", stop)],
 )

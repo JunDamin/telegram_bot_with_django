@@ -1,4 +1,4 @@
-from datetime import time, date
+from datetime import date
 from telegram.ext import (
     CallbackQueryHandler,
     CommandHandler,
@@ -7,7 +7,7 @@ from telegram.ext import (
 )
 from telegram import Update
 
-from logs.models import HalfDayOff
+from logs.models import Leave
 from staff.models import Member
 from inline_messages.telegramcalendar import (
     process_half_day_off,
@@ -53,15 +53,7 @@ def inline_handler(update, context):
         text = f"{user.name} {off_type} off on {off_date} \nhas been registered."
         member = Member.objects.get_or_none(id=user.id)
         off_date = date.fromisoformat(off_date)
-        time_schedule = {
-            "Morning": (
-                time(8, 0),
-                time(12, 0),
-            ),
-            "Afternoon": (time(13, 00), time(16, 30)),
-        }
-        start, end = time_schedule.get(off_type)
-        save_halfdayoff(member, off_date, start, end)
+        save_halfdayoff(member, off_type, off_date)
         update.callback_query.edit_message_text(
             text=text,
         )
@@ -79,8 +71,8 @@ half_day_off_conv = ConversationHandler(
 )
 
 
-def save_halfdayoff(member_fk, offdate, start, end, confirmed=True) -> None:
-    dayoff = HalfDayOff(
-        member_fk=member_fk, date=offdate, start=start, end=end, confirmed=confirmed
+def save_halfdayoff(member_fk, leave_type, offdate, confirmed=False) -> None:
+    dayoff = Leave(
+        member_fk=member_fk, leave_type=leave_type, start_date=offdate, end_date=offdate, confirmed=confirmed
     )
     dayoff.save()

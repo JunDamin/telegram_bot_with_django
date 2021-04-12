@@ -94,13 +94,21 @@ class WorkContent(core_models.TimeStampedModel):
     remarks = models.TextField(null=True, blank=True)
 
 
+leave_options = [
+    ("Full", "Full day"),
+    ("Morning", "Morning off"),
+    ("Aternoon", "Afternoon off"),
+]
+
+
 class Leave(core_models.TimeStampedModel):
+
     member_fk = models.ForeignKey(
         Member, on_delete=models.PROTECT, related_name="leave"
     )
+    leave_type = models.CharField(max_length=12, choices=leave_options)
     start_date = models.DateField()
     end_date = models.DateField()
-    leave_days = models.IntegerField()
     working_days = models.ManyToManyField(WorkingDay, related_name="leave", null=True)
     confirmed = models.BooleanField(default=False)
     remarks = models.TextField(null=True, blank=True)
@@ -127,7 +135,7 @@ class Leave(core_models.TimeStampedModel):
                     day.date, timezone.datetime.min.time()
                 ),
                 status="leave",
-                optional_status="Full Day",
+                optional_status=self.leave_type,
                 longitude="Not Available",
                 latitude="Not Available",
                 working_day=day,
@@ -153,51 +161,8 @@ class Leave(core_models.TimeStampedModel):
         wrong_logs.delete()
 
     def used_day(self):
-        return len(self.working_days.filter(offday=False))
-
-
-class HalfDayOff(core_models.TimeStampedModel):
-    member_fk = models.ForeignKey(
-        Member, on_delete=models.PROTECT, related_name="half_day_off", null=True
-    )
-    date = models.DateField()
-    start = models.TimeField()
-    end = models.TimeField()
-    working_day = models.ForeignKey(
-        WorkingDay,
-        related_name="half_day_off",
-        null=True,
-        on_delete=models.CASCADE,
-    )
-    confirmed = models.BooleanField(default=False)
-    remarks = models.TextField(null=True, blank=True)
-
-    def save(self, *args, **kwargs):
-        # Add working days
-        Q = models.Q
-        print(self.date)
-        day = WorkingDay.objects.filter(Q(date=self.date))
-        print(day)
-        if day:
-            day = day[0]
-            self.working_day = day
-            log, _ = Log.objects.get_or_create(
-                member_fk=self.member_fk,
-                timestamp=timezone.datetime.combine(
-                    day.date, timezone.datetime.min.time()
-                ),
-                status="leave",
-                optional_status="Half Day",
-                longitude="Not Available",
-                latitude="Not Available",
-                working_day=day,
-            )
-            log.save()
-        super(HalfDayOff, self).save(*args, **kwargs)
-
-    def used_day(self):
-        return 0.5
-
-
-def get_off_hour(start, end):
-    return end.hour - start.hour + (end.minute - start.minute) / 60
+        return (
+            len(self.working_days.filter(offday=False))
+            if self.leave_type == "Full"
+            else 0.5
+        )
