@@ -135,17 +135,19 @@ class Leave(core_models.TimeStampedModel):
             log.save()
 
         # Delete wrong record
-
         wrong_logs = Log.objects.filter(
             Q(member_fk=self.member_fk)
             & Q(status="leave")
             & ~Q(
-                working_day__in=list(
-                    *map(
+                working_day__in=[
+                    query
+                    for queryset in map(
                         lambda leave: leave.working_days.all(),
                         self.member_fk.leave.all(),
                     )
-                )
+                    for query in queryset
+                    if query
+                ]
             )
         )
         wrong_logs.delete()

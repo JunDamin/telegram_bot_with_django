@@ -76,7 +76,9 @@ def reply_initiation(update, context):
 
     # Make a branch
     if late:
-        text += "\nYou have been late"
+        texts = text.split('\n')
+        texts.insert(1, "You have been late.\n")
+        text = "\n".join(texts)
 
     reply_message = (
         text.format(

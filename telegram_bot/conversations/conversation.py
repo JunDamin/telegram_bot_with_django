@@ -8,7 +8,6 @@ from conversations import (
     edit_log,
     log_flow,
     text_message,
-    leave_flow,
 )
 
 
@@ -101,11 +100,12 @@ log_flow_conv = ConversationHandler(
 set_get_reason_conv = ConversationHandler(
     entry_points=[
         MessageHandler(
-            Filters.regex("^Ok. I will send you the reason$"), private_only(log_flow.ask_texting_reason)
+            Filters.regex("^Ok. I will send you the reason$"),
+            private_only(log_flow.ask_texting_reason),
         )
     ],
     states={
-         "RECEIVE_REASON": [
+        "RECEIVE_REASON": [
             MessageHandler(Filters.text & Filters.private, log_flow.save_reason),
         ],
     },
@@ -187,7 +187,6 @@ edit_log_conv = ConversationHandler(
     allow_reentry=True,
 )
 
-leave_flow_conv = leave_flow.conv_handler
 
 # add handlers from conversation
 conversation_handlers = (
@@ -197,6 +196,5 @@ conversation_handlers = (
     remove_log_conv,
     edit_log_conv,
     cancel_handler,
-    leave_flow_conv,
     set_get_reason_conv,
 )
