@@ -104,7 +104,7 @@ leave_options = [
 class Leave(core_models.TimeStampedModel):
 
     member_fk = models.ForeignKey(
-        Member, on_delete=models.PROTECT, related_name="leave"
+        Member, on_delete=models.PROTECT, related_name="leaves"
     )
     leave_type = models.CharField(max_length=12, choices=leave_options)
     start_date = models.DateField()
@@ -114,7 +114,9 @@ class Leave(core_models.TimeStampedModel):
     remarks = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.start_date.isoformat()} - {self.end_date.isoformat()}"
+        start = self.start_date.strftime('%Y.%m.%d')
+        end = (" - " + self.end_date.strftime('%Y.%m.%d')) if self.leave_type == 'Full' else ''
+        return f"{self.leave_type} | {start} {end}"
 
     def save(self, *args, **kwargs):
         super(Leave, self).save(*args, **kwargs)
@@ -151,7 +153,7 @@ class Leave(core_models.TimeStampedModel):
                     query
                     for queryset in map(
                         lambda leave: leave.working_days.all(),
-                        self.member_fk.leave.all(),
+                        self.member_fk.leaves.all(),
                     )
                     for query in queryset
                     if query

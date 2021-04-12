@@ -64,6 +64,13 @@ def inline_handler(update, context):
         )
         context.user_data.clear()
         return ConversationHandler.END
+    if action == "CANCEL":
+        text = "OK. Good bye."
+        update.callback_query.edit_message_text(
+            text=text,
+        )
+        context.user_data.clear()
+        return ConversationHandler.END
     return SELECT_OPTION
 
 

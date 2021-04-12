@@ -174,14 +174,18 @@ def create_half_day_options(update, context):
         ],
         [
             InlineKeyboardButton(
-                text="Confirm", callback_data=create_callback_data("CONFIRM")
+                text="Cancel", callback_data=create_callback_data("CANCEL")
             )
-        ]
-        if off_type and date
-        else [
-            InlineKeyboardButton(text="", callback_data=create_callback_data("IGNORE"))
         ],
     ]
+
+    if off_type and date:
+        keyboard[1].append(
+            InlineKeyboardButton(
+                text="Confirm", callback_data=create_callback_data("CONFIRM")
+            )
+        )
+
     return text, InlineKeyboardMarkup(keyboard)
 
 
@@ -211,14 +215,17 @@ def create_full_day_options(update, context):
         ],
         [
             InlineKeyboardButton(
-                text="Confirm", callback_data=create_callback_data("CONFIRM")
+                text="Cancel", callback_data=create_callback_data("CANCEL")
             )
-        ]
-        if start_date and end_date
-        else [
-            InlineKeyboardButton(text="", callback_data=create_callback_data("IGNORE"))
         ],
     ]
+
+    if start_date and end_date:
+        keyboard[1].append(
+            InlineKeyboardButton(
+                text="Confirm", callback_data=create_callback_data("CONFIRM")
+            )
+        )
     return text, InlineKeyboardMarkup(keyboard)
 
 
