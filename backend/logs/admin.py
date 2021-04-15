@@ -168,8 +168,33 @@ class WorkingDayAdmin(admin.ModelAdmin):
     list_filter = (("date", DateRangeFilter),)
 
 
+
+
+
+class LeaveResource(resources.ModelResource):
+
+    class Meta:
+        model = models.Leave
+        fields = (
+            "id",
+            "member_fk",
+            "leave_type",
+            "start_date",
+            "end_date",
+            "remarks",
+        )
+        export_order = (
+            "id",
+            "member_fk",
+            "leave_type",
+            "start_date",
+            "end_date",
+            "remarks",
+        )
+
+
 @admin.register(models.Leave)
-class LeaveAdmin(admin.ModelAdmin):
+class LeaveAdmin(ImportExportMixin, ExportActionMixin, admin.ModelAdmin):
 
     """ Work Content Admin Definition """
 
@@ -182,6 +207,7 @@ class LeaveAdmin(admin.ModelAdmin):
                     "leave_type",
                     "start_date",
                     "end_date",
+                    "remarks"
                 )
             },
         ),
