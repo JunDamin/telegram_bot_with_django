@@ -1,0 +1,65 @@
+@startuml Django Model Relation
+
+class Office {
+    office_name_kr : CharField
+    office_name_en : CharField
+    office_code : IntegerField
+    office_country : CountryField
+    office_timezone : TimeZoneField
+    office_open_time : TimeField
+    office_close_time : TimeField
+}
+
+class Member {
+    id : CharField
+    first_name : CharField
+    last_name : CharField
+    koica_id : CharField
+    office_fk : ForeignKey
+    is_active : BooleanField
+    
+}
+
+Office  --{ Member : fk: Office pk
+
+class Chat {
+    id : CharField pk
+    chat_type : CharField
+    chat_name : CharField
+    office_fk : ForeignKey
+    is_active : BooleanField
+}
+
+Office --{ Chat : fk: Office pk
+
+class WorkingDay {
+    date : DateField
+}
+
+class Log {
+    member_fk : ForeignKey
+    timestamp : DateTime
+    status : CharField
+    optional_status : CharField
+    latitude : CharField
+    longitude : CharField
+    distance : CharField
+    confirmation : TextField
+    remarks : TextField
+    edit_history : TextField
+    working_day : ForeignKey
+}
+
+WorkingDay --{ Log : fk: WorkingDay pk
+Member --{ Log : fk: Member pk
+
+class WorkContent {
+    log_fk : OneToOne
+    content : TextField
+    remarks : TextField
+}
+
+ Log -- WorkContent : fk: Log pk
+
+
+@enduml

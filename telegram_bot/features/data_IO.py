@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from logs.models import Log, WorkContent
+from logs.models import Log, WorkContent, WorkingDay
 from staff.models import Member
 from chats.models import Chat
 from offices.models import Office
@@ -94,10 +94,12 @@ def get_or_create_member(user_id, first_name, last_name, office):
 
 
 def save_log(member, timestamp, status):
+    working_day, _ = WorkingDay.objects.get_or_create(date=timestamp.date())
     log = Log(
         member_fk=member,
         timestamp=timestamp,
         status=status,
+        working_day=working_day,
     )
     log.save()
 

@@ -14,10 +14,10 @@ class OfficeAdmin(admin.ModelAdmin):
     """ Office Admin Definition """
     inlines = [MemberInline, ]
     list_display = (
-        "office_name_kr",
-        "office_name_en", 
-        "office_code",
-        "office_country",
-        "office_open_time",
-        "office_close_time",
+        "name_kr",
+        "name_en", 
+        "code",
+        "country",
+        "open_time",
+        "close_time",
     )
