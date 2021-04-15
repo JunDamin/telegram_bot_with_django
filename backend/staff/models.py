@@ -23,7 +23,7 @@ class Member(core_models.TimeStampedModel):
     def used_leave_in_this_year(self):
         Q = models.Q
         now = timezone.now()
-        leaves = self.leave.filter(
+        leaves = self.leaves.filter(
             Q(working_days__date__year=now.year)
         )
         leave_days = []
@@ -37,7 +37,7 @@ class Member(core_models.TimeStampedModel):
         ## 실제 등록된 시간과 register 된 working day 간의 차이가 발생할 경우 어떻게 해야 하는가?
         Q = models.Q
         now = timezone.now()
-        leaves = self.leave.filter(
+        leaves = self.leaves.filter(
             Q(working_days__date__year=now.year-1)
         )
         print(leaves)
