@@ -110,10 +110,44 @@ class LogAdmin(ImportExportMixin, ExportActionMixin, admin.ModelAdmin):
     )
 
 
+class ContentResource(resources.ModelResource):
+    local_time = Field()
+    local_weekday = Field()
+
+    class Meta:
+        model = models.WorkContent
+        fields = (
+            "id",
+            "log_fk",
+            "log_fk__working_day__date",
+            "local_weekday",
+            "local_time",
+            "content",
+            "remarks",
+        )
+        export_order = (
+            "id",
+            "log_fk",
+            "log_fk__working_day__date",
+            "local_weekday",
+            "local_time",
+            "content",
+            "remarks",
+        )
+
+    def dehydrate_local_time(self, work_content):
+        return work_content.log_fk.local_time()
+
+    def dehydrate_local_weekday(self, work_content):
+        return "%s" % work_content.log_fk.local_weekday()
+
+
 @admin.register(models.WorkContent)
-class WorkContentAdmin(admin.ModelAdmin):
+class WorkContentAdmin(ImportExportMixin, ExportActionMixin, admin.ModelAdmin):
 
     """ Work Content Admin Definition """
+
+    resource_class = ContentResource
 
     list_display = (
         "id",
