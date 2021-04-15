@@ -67,14 +67,14 @@ def create_calendar(year=None, month=None):
     row.append(
         InlineKeyboardButton(
             "<",
-            callback_data=create_callback_data("PREV-MONTH", (year, month, day)),
+            callback_data=create_callback_data("PREV", (year, month, day)),
         )
     )
     row.append(InlineKeyboardButton(" ", callback_data=data_ignore))
     row.append(
         InlineKeyboardButton(
             ">",
-            callback_data=create_callback_data("NEXT-MONTH", (year, month, day)),
+            callback_data=create_callback_data("NEXT", (year, month, day)),
         )
     )
     keyboard.append(row)
