@@ -167,7 +167,7 @@ class Leave(core_models.TimeStampedModel):
 
     def used_day(self):
         return (
-            len(self.working_days.filter(offday=False))
+            len(self.working_days.filter(isOffday=False))
             if self.leave_type == "Full"
-            else 0.5 * len(self.working_days.filter(offday=False))
+            else 0.5 * len(self.working_days.filter(isOffday=False))
         )
