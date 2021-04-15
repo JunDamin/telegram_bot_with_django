@@ -12,6 +12,9 @@ class WorkingDay(core_models.TimeStampedModel):
         return self.date.isoformat()
 
     def save(self, *args, **kwargs):
+        # Offday check
+        if self.date.isoweekday in [6, 7]:
+            self.isOffday = True
         super(WorkingDay, self).save(*args, **kwargs)
         if self.isOffday:
             return None
@@ -116,7 +119,7 @@ class Leave(core_models.TimeStampedModel):
     def __str__(self):
         start = self.start_date.strftime('%Y.%m.%d')
         end = (" - " + self.end_date.strftime('%Y.%m.%d')) if self.leave_type == 'Full' else ''
-        return f"{self.leave_type} | {start} {end}"
+        return f"ID. {self.id} | {self.member_fk} | {self.leave_type} | {start} {end}"
 
     def save(self, *args, **kwargs):
         super(Leave, self).save(*args, **kwargs)
@@ -166,5 +169,5 @@ class Leave(core_models.TimeStampedModel):
         return (
             len(self.working_days.filter(offday=False))
             if self.leave_type == "Full"
-            else 0.5
+            else 0.5 * len(self.working_days.filter(offday=False))
         )

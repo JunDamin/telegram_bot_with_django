@@ -77,11 +77,16 @@ def show(update, context):
     year = date.today().year
     leaves = member.leaves.filter(end_date__gte=date(year, 1, 1))
     text = (
-        f"You have registerd {len(leaves)} leaves.",
+        f"You have registerd {len(leaves)} leaves within this year.",
         "Please check the list below.\n",
     )
     for leave in leaves:
-        text += (f"{leave}",)
+        leave_date = leave.start_date.strftime("%Y.%m.%d") + (
+            (" - " + leave.end_date.strftime("%Y.%m.%d"))
+            if leave.leave_type == "Full"
+            else ""
+        )
+        text += (f"id : {leave.id} | {leave.leave_type} | {leave_date}\n",)
 
     text = "\n".join(text)
     buttons = [

@@ -144,6 +144,7 @@ class LeaveAdmin(admin.ModelAdmin):
             "basic",
             {
                 "fields": (
+                    "member_fk",
                     "leave_type",
                     "start_date",
                     "end_date",
