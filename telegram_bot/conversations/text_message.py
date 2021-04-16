@@ -90,7 +90,7 @@ optional_status_keyboard = {
     "signing out": [
         [
             "I worked at Office",
-            "I worked at home(I summit daily report)",
+            "I worked at home(I submit daily report)",
         ]
     ],
     "getting back": [

@@ -77,7 +77,7 @@ def reply_initiation(update, context):
     # Make a branch
     if late:
         texts = text.split('\n')
-        texts.insert(1, "You have been late.\n")
+        texts.insert(1, "You are late.\n")
         text = "\n".join(texts)
 
     reply_message = (
@@ -144,7 +144,7 @@ def ask_reason(update, context):
         update,
         context,
         log.member_fk.id,
-        "You have been late! \nCan you text me the reason you late?",
+        "You are late! \nCan you text me the reason why you late?",
         [["Ok. I will send you the reason"]],
     )
     return ASK_OVERWRITE
