@@ -3,6 +3,7 @@ from telegram import KeyboardButton
 from telegram.ext import MessageHandler, Filters, ConversationHandler
 from features.message import send_markdown, reply_markdown
 
+
 class Node:
     """ define node in conversation """
 
@@ -16,6 +17,8 @@ class Node:
         handler=MessageHandler,
         isPublic=False,
         isEntry=False,
+        isReply=True,
+        inputType="regex",
     ):
         self.added = False
         self.state = None
@@ -27,26 +30,52 @@ class Node:
         self.handler = handler
         self.isPublic = isPublic
         self.isEntry = isEntry
+        self.isReply = isReply
+        self.isLocation = inputType == "location"
+        self.isText = inputType == "text"
+        self.isRegex = inputType == "regex"
+
+    def get_button(self):
+        if self.isLocation:
+            button = KeyboardButton("Share Location", request_location=True)
+        if self.isRegex:
+            button = self.button
+        if self.isText:
+            button = None
+        return button
 
     def get_handler(self):
-        # need to distinguish location command handler
-        if type(self.button) == KeyboardButton:
+        if self.isLocation:
             button_filter = Filters.location
-        else:
+        if self.isRegex:
             pattern = re.compile(f"^{self.button}$", re.IGNORECASE)
             button_filter = Filters.regex(pattern)
+        if self.isText:
+            button_filter = Filters.text
         if not self.isPublic:
             button_filter = button_filter & Filters.chat_type.private
         return self.handler(button_filter, self.get_callback)
 
     def get_callback(self, update, context):
-        msg = self.procedure(update, context)
-        reply_markdown(update, context, msg, self.get_keyboard())
+        # procdure should return id and msg, id is optional if isReply
+        id, msg = self.procedure(update, context)
+        if self.isReply:
+            reply_markdown(update, context, msg, self.get_keyboard())
+        else:
+            send_markdown(update, context, id, msg, self.get_keyboard())
         return self.state if self.children else ConversationHandler.END
 
     def get_keyboard(self):
         """ get children's button into keyboard """
-        return [[child.button for child in self.children]] if self.children else None
+        keyboard = [[child.get_button() for child in self.children]]
+        #  check none key
+        if [key for key in keyboard[0] if not key]:
+            keyboard = None
+        return keyboard if self.children else None
+
+    def set_condtional_children(self, func, child_dict):
+        # self.children = #flatten list?
+        pass
 
 
 class ConversationTree:
@@ -77,12 +106,13 @@ class ConversationTree:
         print(len(self.nodes))
         header = "@startuml\n'default\ntop to bottom direction\n"
         footer = "@enduml"
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             f.write(header)
             for node in self.nodes:
                 for child in node.children:
                     f.write(f"({node.name}) --> ({child.name}): {child.button}\n")
             f.write(footer)
+
 
 def get_all_nodes(node, nodes=[]):
     """ search all the nodes from node """
@@ -93,17 +123,3 @@ def get_all_nodes(node, nodes=[]):
     for child in node.children:
         nodes = get_all_nodes(child, nodes)
     return nodes
-
-
-test_root = Node("Initial", "test", lambda update, context: update.message.text, isEntry=True)
-child1 = Node("check", "child1", lambda update, context: "child1")
-child2 = Node("test2", "Child2", lambda update, context: "child2")
-test_root.children = [child1, child2]
-grand1 = Node("Whot", "grand1", lambda update, context: "grand1")
-grand2 = Node("test", "grand2", lambda update, context: "grand2")
-child1.children = [grand1, grand2]
-child2.children = [grand1, grand2]
-tree = ConversationTree(test_root)
-
-tree_conv = tree.get_conversation()
-tree.get_graph("test.wsd")

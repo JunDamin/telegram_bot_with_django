@@ -8,7 +8,6 @@ from conversations import (
     edit_log,
     log_flow,
     text_message,
-    classes
 )
 
 
@@ -198,5 +197,4 @@ conversation_handlers = (
     edit_log_conv,
     cancel_handler,
     set_get_reason_conv,
-    classes.tree_conv
 )
