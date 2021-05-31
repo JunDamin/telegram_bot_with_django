@@ -1,6 +1,7 @@
 import re
 from telegram import KeyboardButton
 from telegram.ext import MessageHandler, Filters, ConversationHandler
+from telegram.utils.types import JSONDict
 from features.message import send_markdown, reply_markdown
 
 
@@ -61,11 +62,22 @@ class Node:
 
     def get_callback(self, update, context):
         # procdure should return id and msg, id is optional if isReply
-        id, msg = self.procedure(update, context)
+        self.data = self.procedure(update, context)
         if self.isReply:
-            reply_markdown(update, context, msg, self.get_keyboard())
+            reply_markdown(
+                update,
+                context,
+                self.data["message"],
+                self.get_keyboard(),
+            )
         else:
-            send_markdown(update, context, id, msg, self.get_keyboard())
+            send_markdown(
+                update,
+                context,
+                self.data["id"],
+                self.data["message"],
+                self.get_keyboard(),
+            )
         return self.state if self.children else ConversationHandler.END
 
     def get_keyboard(self):
@@ -76,9 +88,20 @@ class Node:
             keyboard = None
         return keyboard if self.children else None
 
-    def set_condtional_children(self, func, child_dict):
-        # self.children = #flatten list?
-        pass
+
+class ConditionalNode(Node):
+    def get_keyboard(self):
+        condition = self.data["condition"]
+        keyboard = [[child.get_button() for child in self.children_dict[condition]]]
+        if [key for key in keyboard[0] if not key]:
+            keyboard = None
+        return keyboard if self.children else None
+
+    def set_condtional_children(self, children_dict):
+        self.children_dict = children_dict
+        self.children = [
+            node for key in children_dict.keys() for node in children_dict[key]
+        ]
 
 
 class ConversationTree:
@@ -118,7 +141,7 @@ class ConversationTree:
 
 def get_all_nodes(node, nodes=[]):
     """ search all the nodes from node """
-    nodes = [node for node in nodes]    # new reference
+    nodes = [node for node in nodes]  # new reference
     if node.added:
         return nodes
     node.added = True
