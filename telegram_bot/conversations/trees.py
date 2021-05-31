@@ -1,23 +1,35 @@
-from conversations.tree_classes import Node, ConversationTree
+from conversations.tree_classes import Node, ConversationTree, get_all_nodes
+from conversations.tree_callbacks import *
+
+### sign in flow
+sign_in_init = Node("sign in initiate", "sign_in", create_log, isEntry=True)
+# optional status 
+work_at_home = Node("work at home", "Home", add_optional_status)
+work_at_office = Node("work at office", "Office", add_optional_status)
+business_trip = Node("on business trip", "Business Trip", add_optional_status)
+sign_in_init.children = [work_at_home, work_at_office, business_trip]
+# location
+location = Node("location", "location", add_location)
+for  i in [work_at_home, work_at_office, business_trip]:
+    i.children = [location]
+# Confirmation
+confirm = Node("confirmation", "Confirm", confirm_log)
+edit = Node("back to edit", "Edit", lambda x, y: (0, "Where do you work?"), [work_at_home, work_at_office, business_trip])
+location.children = [confirm, edit]
+
+# Over write flow
+test2 = Node("back to edit", "Edit", lambda x, y: (0, "Where do you work?"))
+# rewrite = Node("", "Rewrite")
+# cancel = Node("", "Cancel")
+# confirm_rewrite = Node("", "Yes, I delete and write again")
 
 
-test_root = Node("test", "test", lambda update, context: (None, "Please text me the reason."), isEntry=True)
-child1 = Node("test location", "location", lambda update, context: (None, "child1"), inputType="location")
-child2 = Node("test2", "Child2", lambda update, context: (None, "child2"))
-test_root.children = [child1, child2]
-grand1 = Node("test", "grand1", lambda update, context: (None, "type text"))
-grand2 = Node("test", "grand2", lambda update, context: (None, "grand2"))
-child1.children = [grand1, grand2]
-child2.children = [grand1, grand2]
-grandgrand = Node("text", "text", lambda update, context: (None, "get text"), inputType="text")
-grand1.children = [grandgrand]
-end_node = Node("End", "Confirm", lambda update, context: (None, "Confirmed"))
-grandgrand.children = [end_node]
-
-tree = ConversationTree(test_root)
-tree_conv = tree.get_conversation()
-tree.get_graph("telegram_bot/diagrams/conversation_tree.wsd")
+# 
+sign_in_tree = ConversationTree(sign_in_init)
 
 conversations = [
-    tree_conv
+    tree_conv,
+    sign_in_tree.get_conversation()
 ]
+
+sign_in_tree.get_graph("telegram_bot/diagrams/tree_sign_in.wsd")

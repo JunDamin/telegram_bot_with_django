@@ -35,6 +35,9 @@ class Node:
         self.isText = inputType == "text"
         self.isRegex = inputType == "regex"
 
+    def __str__(self):
+        return f"Node: {self.name}"
+
     def get_button(self):
         if self.isLocation:
             button = KeyboardButton("Share Location", request_location=True)
@@ -81,7 +84,7 @@ class Node:
 class ConversationTree:
     def __init__(self, root):
         self.root = root
-        self.nodes = get_all_nodes(self.root)
+        self.nodes = get_all_nodes(root)
 
     def get_conversation(self):
         entry_points = [node.get_handler() for node in self.nodes if node.isEntry]
@@ -103,7 +106,6 @@ class ConversationTree:
         )
 
     def get_graph(self, path):
-        print(len(self.nodes))
         header = "@startuml\n'default\ntop to bottom direction\n"
         footer = "@enduml"
         with open(path, "w") as f:
@@ -116,6 +118,7 @@ class ConversationTree:
 
 def get_all_nodes(node, nodes=[]):
     """ search all the nodes from node """
+    nodes = [node for node in nodes]    # new reference
     if node.added:
         return nodes
     node.added = True

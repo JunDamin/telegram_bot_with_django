@@ -190,8 +190,8 @@ edit_log_conv = ConversationHandler(
 
 # add handlers from conversation
 conversation_handlers = (
-    start_log_flow_conv,
-    log_flow_conv,
+    #start_log_flow_conv,
+    # log_flow_conv,
     set_remarks_conv,
     remove_log_conv,
     edit_log_conv,
