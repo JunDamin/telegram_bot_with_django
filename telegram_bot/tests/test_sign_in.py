@@ -7,6 +7,9 @@ from common_parts import (
     get_reply_of_message_of_id,
     erase_log,
     check_assert_with_qna,
+    chat_room_id,
+    bot_id,
+    sleep_time
 )
 
 # Your API ID, hash and session string here
@@ -15,9 +18,7 @@ api_hash = os.environ["APP_HASH"]
 session_str = os.environ["SESSION"]
 
 # constant variable
-chat_room_id = -444903176
-bot_id = "@KOICA_test_bot"
-sleep_time = 0.5
+
 
 
 @pytest.mark.asyncio
@@ -94,17 +95,8 @@ async def test_sign_in_rewrite(client: TelegramClient):
     async with client.conversation(bot_id) as conv:
 
         qna = [
-            ("Delete and Rewrite", "Do you really want to do remove log No."),
-            ("Remove the log", "has been Deleted"),
-        ]
-
-        await check_assert_with_qna(qna, conv)
-
-        response = await conv.get_response()
-        print(response.text)
-        assert "Would you like to share where you work" in response.text
-
-        qna = [
+            ("Rewrite the log", "Do you really want to do remove log No."),
+            ("Yes, I delete and write again", "You have relogged as below."),
             ("Office", "I see"),
             ("Not Available", "You have logged as below. Do you want to confirm"),
             ("Confirm", "Confirmed"),
@@ -131,7 +123,7 @@ async def test_sign_in_edit(client: TelegramClient):
         qna = [
             ("Office", "I see"),
             ("Not Available", "You have logged as below. Do you want to confirm"),
-            ("Edit", "Would you like to share where you work"),
+            ("Go back", "Where do you work?"),
             ("Office", "I see"),
             ("Not Available", "You have logged as below. Do you want to confirm"),
             ("Confirm", "Confirmed"),

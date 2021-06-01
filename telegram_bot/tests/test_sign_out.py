@@ -7,6 +7,9 @@ from common_parts import (
     get_reply_of_message_of_id,
     erase_log,
     check_assert_with_qna,
+    chat_room_id,
+    bot_id,
+    sleep_time,
 )
 
 
@@ -14,11 +17,6 @@ from common_parts import (
 api_id = int(os.environ["APP_ID"])
 api_hash = os.environ["APP_HASH"]
 session_str = os.environ["SESSION"]
-
-# constant variable
-chat_room_id = -444903176
-bot_id = "@KOICA_test_bot"
-sleep_time = 0.5
 
 
 @pytest.mark.asyncio
@@ -73,7 +71,7 @@ async def test_sign_out_first(client: TelegramClient):
         sleep(sleep_time)
 
         qna = [
-            ("I worked at Office", "I see"),
+            ("Office", "I see"),
             ("Not Available", "You have logged as below."),
             ("Confirm", "Confirmed"),
         ]
@@ -89,9 +87,6 @@ async def test_sign_out_rewrite(client: TelegramClient):
 
     # ...Get back Test
     reply = await get_reply_of_message_of_id(chat_room_id, "sign out", client)
-    m = re.search(r"Log No.(\d+)", reply)
-    log_id = m.group(1)
-
     reply = await get_reply_of_message_of_id(bot_id, "", client)
 
     sleep(sleep_time)
@@ -99,28 +94,20 @@ async def test_sign_out_rewrite(client: TelegramClient):
     async with client.conversation(bot_id) as conv:
 
         qna = [
-            ("Delete and Rewrite", "Do you really want to do remove log No."),
-            ("Remove the log", "has been Deleted"),
-        ]
-
-        await check_assert_with_qna(qna, conv)
-
-        response = await conv.get_response()
-        print(response.text)
-        assert "Would you like to share your today's content of work" in response.text
-
-        qna = [
+            ("Rewrite the log", "Do you really want to do remove log No."),
+            ("Yes, I delete and write again", "You have relogged as below."),
+            ("Home", "I see"),
+            ("Not Available", "You have logged as below. Do you want to confirm"),
             (
-                "I worked at home(I summit daily report)",
-                "OK. Please text me what you have done",
+                "Send content of today",
+                "Please text me the today's work.",
             ),
             ("It is a test", "Content of Work"),
-            ("YES", "I see"),
-            ("Not Available", "You have logged as below."),
+            ("Save content", "Content has been saved"),
             ("Confirm", "Confirmed"),
         ]
 
-        await check_assert_with_qna(qna, conv)
+        log_id = await check_assert_with_qna(qna, conv)
 
     # earase log after use
     await erase_log(bot_id, str(log_id), client)
@@ -133,12 +120,7 @@ async def test_sign_out_report(client: TelegramClient):
 
     # ...Get back Test
     reply = await get_reply_of_message_of_id(chat_room_id, "sign out", client)
-    m = re.search(r"Log No.(\d+)", reply)
     reply = await get_reply_of_message_of_id(bot_id, "", client)
-
-    if m:
-        log_id = m.group(1)
-        print(log_id)
 
     # conversation
     async with client.conversation(bot_id) as conv:
@@ -146,13 +128,14 @@ async def test_sign_out_report(client: TelegramClient):
         sleep(sleep_time)
 
         qna = [
+            ("Home", "I see"),
+            ("Not Available", "You have logged as below."),
             (
-                "I worked at home(I summit daily report)",
-                "OK. Please text me what you have done",
+                "Send content of today",
+                "Please text me the today's work.",
             ),
             ("It is a test", "Content of Work"),
-            ("YES", "I see"),
-            ("Not Available", "You have logged as below."),
+            ("Save content", "Content has been saved"),
             ("Confirm", "Confirmed"),
         ]
 
@@ -167,28 +150,27 @@ async def test_sign_out_edit(client: TelegramClient):
     # ...Get back Test
     reply = await get_reply_of_message_of_id(chat_room_id, "sign out", client)
     reply = await get_reply_of_message_of_id(bot_id, "", client)
-    m = re.search(r"Log No.(\d+)", reply)
-    log_id = m.group(1)
 
     # Signing in conversation
     async with client.conversation(bot_id) as conv:
 
         qna = [
+            ("Home", "I see"),
+            ("Not Available", "You have logged as below."),
             (
-                "I worked at home(I summit daily report)",
-                "OK. Please text me what you have done",
+                "Send content of today",
+                "Please text me the today's work.",
             ),
             ("It is a test", "Content of Work"),
-            ("YES", "I see"),
-            ("Not Available", "You have logged as below."),
-            ("Edit", "Would you like to share your today's content of work"),
-            ("I worked at Office", "I see"),
-            ("Not Available", "You have logged as below."),
+            ("Save content", "Content has been saved"),
+            ("Go back", "Where do you work?"),
+            ("Office", "I see"),
+            ("Not Available", "You have logged as below. Do you want to confirm"),
             ("Confirm", "Confirmed"),
             ("/work_content", ""),
         ]
 
-        await check_assert_with_qna(qna, conv)
+        log_id = await check_assert_with_qna(qna, conv)
 
         # earase log after use
         await erase_log(bot_id, str(log_id), client)
