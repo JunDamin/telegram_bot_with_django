@@ -118,6 +118,8 @@ class ConversationTree:
     def __init__(self, root):
         self.root = root
         self.nodes = get_all_nodes(root)
+        for node in self.nodes:
+            node.added = False
 
     def get_conversation(self):
         entry_points = [node.get_handler() for node in self.nodes if node.isEntry]

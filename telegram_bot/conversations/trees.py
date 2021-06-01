@@ -75,7 +75,9 @@ signing_out.set_condtional_children(
 location = ConditionalNode(
     "location", "location", add_location, inputType="location"
 ).set_parents(optional_status)
-not_available = ConditionalNode("location Not available", "Not Available", add_location).set_parents(optional_status)
+not_available = ConditionalNode(
+    "location Not available", "Not Available", add_location
+).set_parents(optional_status)
 
 # Confirmation
 confirm = Node("confirmation", "Confirm", confirm_log).set_parents([location])
@@ -84,6 +86,7 @@ edit = (
     .set_parents([location])
     .set_children(optional_status)
 )
+# Ask content
 asking_content = Node(
     "Report content", "Send content of today", ask_content
 ).set_parents([location])
@@ -95,23 +98,95 @@ save_content = (
     .set_parents([ask_content_confirmation])
     .set_children([confirm, edit])
 )
-content_edited = Node("edit content", "Edit content", ask_content).set_parents([ask_content_confirmation]).set_children([confirm, edit])
+content_edited = (
+    Node("edit content", "Edit content", ask_content)
+    .set_parents([ask_content_confirmation])
+    .set_children([confirm, edit])
+)
+
+# getting back
+
+getting_back = ConditionalNode(
+    "getting back",
+    "back from break.?|back to work.?|lunch over.?|break over.?",
+    sign_in_init,
+    isEntry=True,
+    isPublic=True,
+    isReply=False,
+)
+
+with_koica = (
+    Node("lunch_with_koica", "With KOICA Colleagues", add_optional_status, isEntry=True)
+    .set_parents([getting_back])
+    .set_children([location, not_available])
+)
+
+without_koica = (
+    Node(
+        "lunch wihtout koica",
+        "Without any member of KOICA",
+        add_optional_status,
+        isEntry=True,
+    )
+    .set_parents([getting_back])
+    .set_children([location, not_available])
+)
+
+lunch_options = [with_koica, without_koica]
+
+edit_lunch = (
+    Node(
+        "Go back",
+        "Go_back",
+        lambda x, y: {"message": "Did you have lunch with KOICA collague?"},
+    )
+    .set_parents([location])
+    .set_children(lunch_options)
+)
+
+# Over write flow
+rewrite_lunch = Node("check rewrite lunch log", "Rewrite the lunch log", check_rewrite_log, isEntry=True)
+confirm_rewrite_lunch = (
+    Node("confirm rewrite", "Yes, I delete and write again", rewrite_log)
+    .set_parents([rewrite_lunch])
+    .set_children(lunch_options)
+)
+cancel = Node("cancel", "Cancel", cancel).set_parents([rewrite_lunch])
+
+# set getting back 
+getting_back.set_condtional_children(
+    {
+        "new": lunch_options,
+        "duplicated": [rewrite_lunch, cancel],
+        "late": [ask_reason],
+    }
+)
+
+# update location
 location.set_condtional_children(
     {
         "done": [confirm, edit],
         "content": [asking_content, edit],
+        "lunch": [confirm, edit_lunch],
     }
 )
+
 not_available.set_condtional_children(
     {
         "done": [confirm, edit],
         "content": [asking_content, edit],
+        "lunch": [confirm, edit_lunch],
     }
 )
-
-#
+# create tree
 sign_in_tree = ConversationTree(signing_in)
 sign_out_tree = ConversationTree(signing_out)
-conversations = [sign_in_tree.get_conversation(), sign_out_tree.get_conversation()]
+get_back_tree = ConversationTree(getting_back)
+conversations = [
+    sign_in_tree.get_conversation(),
+    sign_out_tree.get_conversation(),
+    get_back_tree.get_conversation(),
+]
 
 sign_in_tree.get_graph("telegram_bot/diagrams/tree_sign_in.wsd")
+get_back_tree.get_graph("telegram_bot/diagrams/tree_get_back.wsd")

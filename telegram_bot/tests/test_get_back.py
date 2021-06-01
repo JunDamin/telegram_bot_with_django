@@ -7,6 +7,9 @@ from common_parts import (
     get_reply_of_message_of_id,
     erase_log,
     check_assert_with_qna,
+    chat_room_id,
+    bot_id,
+    sleep_time
 )
 
 # Your API ID, hash and session string here
@@ -82,34 +85,20 @@ async def test_get_back_rewrite(client: TelegramClient):
     sleep(sleep_time)
     # ...Get back Test
     reply = await get_reply_of_message_of_id(chat_room_id, "back to work", client)
-
     reply = await get_reply_of_message_of_id(bot_id, "", client)
-    m = re.search(r"Log No.(\d+)", reply)
-    if m:
-        log_id = m.group(1)
-    sleep(sleep_time)
 
     # Signing in conversation
     async with client.conversation(bot_id) as conv:
 
         qna = [
-            ("Delete and Rewrite", "Do you really want to do remove log No."),
-            ("Remove the log", "has been Deleted"),
-        ]
-
-        await check_assert_with_qna(qna, conv)
-
-        response = await conv.get_response()
-        print(response.text)
-        assert "Did you have lunch with KOICA collague" in response.text
-
-        qna = [
+            ("Rewrite the lunch log", "Do you really want to do remove log No."),
+            ("Yes, I delete and write again", "You have relogged as below."),
             ("With KOICA Colleagues", "I see"),
             ("Not Available", "You have logged as below."),
             ("Confirm", "Confirmed"),
         ]
 
-        await check_assert_with_qna(qna, conv)
+        log_id = await check_assert_with_qna(qna, conv)
 
     # earase log after use
     await erase_log(bot_id, str(log_id), client)
@@ -130,7 +119,7 @@ async def test_get_back_edit(client: TelegramClient):
         qna = [
             ("With KOICA Colleagues", "I see"),
             ("Not Available", "You have logged as below."),
-            ("Edit", "Did you have lunch with KOICA collague"),
+            ("Go_back", "Did you have lunch with KOICA collague"),
             ("With KOICA Colleagues", "I see"),
             ("Not Available", "You have logged as below."),
             ("Confirm", "Confirmed"),

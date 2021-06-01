@@ -122,8 +122,9 @@ def add_location(update, context):
         ],
         text_message,
     )
-
+    print(log.status)
     condition = "content" if log.status == "signing out" and log.optional_status == "Home" else "done"
+    condition = "lunch" if log.status == "getting back" else condition
     return {"condition": condition, "message": text_message}
 
 
