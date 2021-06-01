@@ -26,7 +26,7 @@ class Node:
         self.name = name
         self.button = button
         self.procedure = procedure
-        self.children = children
+        self.children = children[:]
         self.root = root
         self.handler = handler
         self.isPublic = isPublic
@@ -88,6 +88,16 @@ class Node:
             keyboard = None
         return keyboard if self.children else None
 
+    def set_parents(self, parents: list):
+        for parent in parents:
+            parent.children.append(self)
+        return self
+
+    def set_children(self, children: list):
+        for child in children:
+            self.children.append(child)
+        return self
+
 
 class ConditionalNode(Node):
     def get_keyboard(self):
@@ -141,7 +151,7 @@ class ConversationTree:
 
 def get_all_nodes(node, nodes=[]):
     """ search all the nodes from node """
-    nodes = [node for node in nodes]  # new reference
+    nodes = nodes[:]  # new reference
     if node.added:
         return nodes
     node.added = True

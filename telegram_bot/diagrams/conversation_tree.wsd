@@ -2,11 +2,11 @@
 'default
 top to bottom direction
 (test) --> (test location): location
-(test) --> (test2): Child2
-(test location) --> (test): grand1
-(test location) --> (test): grand2
-(test) --> (text): text
-(text) --> (End): Confirm
-(test2) --> (test): grand1
-(test2) --> (test): grand2
+(test) --> (child2): Child2
+(test location) --> (grand1): grand1
+(test location) --> (grand1): grand2
+(grand1) --> (grandgrand): text
+(grandgrand) --> (End): Confirm
+(child2) --> (grand1): grand1
+(child2) --> (grand1): grand2
 @enduml

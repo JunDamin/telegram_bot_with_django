@@ -1,0 +1,27 @@
+@startuml
+'default
+top to bottom direction
+(sign in initiate) --> (work at home): Home
+(sign in initiate) --> (work at office): Office
+(sign in initiate) --> (on business trip): Business Trip
+(sign in initiate) --> (check rewrite): Rewrite the log
+(sign in initiate) --> (cancel): Cancel
+(sign in initiate) --> (Ask reason): Yes. I text you the reason
+(work at home) --> (location): location
+(location) --> (confirmation): Confirm
+(location) --> (Go back): Go back
+(Go back) --> (work at home): Home
+(Go back) --> (work at office): Office
+(Go back) --> (on business trip): Business Trip
+(work at office) --> (location): location
+(on business trip) --> (location): location
+(check rewrite) --> (confirm rewrite): Yes, I delete and write again
+(check rewrite) --> (cancel): Cancel
+(confirm rewrite) --> (work at home): Home
+(confirm rewrite) --> (work at office): Office
+(confirm rewrite) --> (on business trip): Business Trip
+(Ask reason) --> (Receved reason): text
+(Receved reason) --> (work at home): Home
+(Receved reason) --> (work at office): Office
+(Receved reason) --> (on business trip): Business Trip
+@enduml
