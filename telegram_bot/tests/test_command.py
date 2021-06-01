@@ -12,7 +12,7 @@ api_hash = os.environ["APP_HASH"]
 session_str = os.environ["SESSION"]
 
 # constant variable
-chat_room_id = -444903176
+chat_room_id = -1001374914057
 bot_id = "@KOICA_test_bot"
 sleep_time = 0.5
 

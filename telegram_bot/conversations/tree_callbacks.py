@@ -91,7 +91,7 @@ def sign_in_init(update, context):
     print(text)
     reply_markdown(update, context, reply_message)
     reply_message += REWRITE_FOOTER
-    return {"message": reply_message, "condition": "late", "id": id}
+    return {"message": reply_message, "condition": condition, "id": id}
 
 
 def add_optional_status(update, context):
@@ -122,12 +122,15 @@ def add_location(update, context):
         ],
         text_message,
     )
-    return {"message": text_message}
+
+    condition = "content" if log.status == "signing out" and log.optional_status == "Home" else "done"
+    return {"condition": condition, "message": text_message}
 
 
 def confirm_log(update, context):
     """ """
     # update confirmation on log table
+    condition = "done"
     return {"message": "Confirmed."}
 
 
@@ -171,3 +174,23 @@ def receive_reason(update, context):
     text_message += "\n\nPlease choose where you work."
 
     return {"message": text_message}
+
+
+def ask_content(update, context):
+    text = "Please text me the today's work."
+    return {"message": text}
+
+
+def confirm_content(update, context):
+    answer = update.message.text
+    context.user_data["work_content"] = answer
+    answer = context.user_data.get("work_content")
+    text_message = CHECK_CONTENT_TEXT.format(answer=answer)
+    return {"message": text_message}
+
+def save_content(update,  context):
+    content = context.user_data.get("work_content")
+    post_work_content(update, context, content)
+    text = "Content has been saved\n"
+    text += "Thank you."
+    return {"message": text}
