@@ -1,6 +1,6 @@
 import re
 from telegram import KeyboardButton
-from telegram.ext import MessageHandler, Filters, ConversationHandler
+from telegram.ext import MessageHandler, Filters, ConversationHandler, CommandHandler
 from telegram.utils.types import JSONDict
 from features.message import send_markdown, reply_markdown
 
@@ -13,9 +13,7 @@ class Node:
         name,
         button,
         procedure,
-        children=[],
         root=None,
-        handler=MessageHandler,
         isPublic=False,
         isEntry=False,
         isReply=True,
@@ -26,15 +24,16 @@ class Node:
         self.name = name
         self.button = button
         self.procedure = procedure
-        self.children = children[:]
+        self._children = []
+        self._parents = []
         self.root = root
-        self.handler = handler
         self.isPublic = isPublic
         self.isEntry = isEntry
         self.isReply = isReply
         self.isLocation = inputType == "location"
         self.isText = inputType == "text"
         self.isRegex = inputType == "regex"
+        self.isCommand = inputType == "command"
 
     def __str__(self):
         return f"Node: {self.name}"
@@ -49,6 +48,8 @@ class Node:
         return button
 
     def get_handler(self):
+        if self.isCommand:
+            return CommandHandler(self.button, self.get_callback)
         if self.isLocation:
             button_filter = Filters.location
         if self.isRegex:
@@ -58,7 +59,7 @@ class Node:
             button_filter = Filters.text
         if not self.isPublic:
             button_filter = button_filter & Filters.chat_type.private
-        return self.handler(button_filter, self.get_callback)
+        return MessageHandler(button_filter, self.get_callback)
 
     def get_callback(self, update, context):
         # procdure should return id and msg, id is optional if isReply
@@ -78,40 +79,57 @@ class Node:
                 self.data["message"],
                 self.get_keyboard(),
             )
-        return self.state if self.children else ConversationHandler.END
+        
+        if self.data.get("path"):
+            options = {"redo": self._parents[0].state, "escape": ConversationHandler.END}
+            return options[self.data.get("path")]
+        return self.state if self._children else ConversationHandler.END
 
     def get_keyboard(self):
         """ get children's button into keyboard """
-        keyboard = [[child.get_button() for child in self.children]]
+        # check cumstom keyboard
+        if self.data.get("keyboard"):
+            return self.data.get("keyboard") if not [[]] else None
+
+        keyboard = [[child.get_button() for child in self._children]]
         #  check none key
         if [key for key in keyboard[0] if not key]:
             keyboard = None
-        return keyboard if self.children else None
+        return keyboard if self._children else None
 
     def set_parents(self, parents: list):
         for parent in parents:
-            parent.children.append(self)
+            if self not in parent._children:
+                parent._children.append(self)
+            if parent not in self._parents:
+                self._parents.append(parent)
         return self
 
     def set_children(self, children: list):
         for child in children:
-            self.children.append(child)
+            if child not in self._children:
+                self._children.append(child)
+            if self not in child._parents:
+                child._parents.append(self)
         return self
 
 
 class ConditionalNode(Node):
     def get_keyboard(self):
         condition = self.data["condition"]
-        keyboard = [[child.get_button() for child in self.children_dict[condition]]]
+        keyboard = [[child.get_button() for child in self._children_dict[condition]]]
         if [key for key in keyboard[0] if not key]:
             keyboard = None
-        return keyboard if self.children else None
+        return keyboard if self._children else None
 
     def set_condtional_children(self, children_dict):
-        self.children_dict = children_dict
-        self.children = [
+        self._children_dict = children_dict
+        self._children = [
             node for key in children_dict.keys() for node in children_dict[key]
         ]
+        for child in self._children:
+            if self not in child._parents:
+                child._parents.append(self)
 
 
 class ConversationTree:
@@ -127,9 +145,9 @@ class ConversationTree:
         for i, node in enumerate(self.nodes):
             node.state = i
             states[i] = (
-                states[i].extend([child.get_handler() for child in node.children])
+                states[i].extend([child.get_handler() for child in node._children])
                 if states.get(i)
-                else [child.get_handler() for child in node.children]
+                else [child.get_handler() for child in node._children]
             )
         fallbacks = []
         return ConversationHandler(
@@ -146,7 +164,7 @@ class ConversationTree:
         with open(path, "w") as f:
             f.write(header)
             for node in self.nodes:
-                for child in node.children:
+                for child in node._children:
                     f.write(f"({node.name}) --> ({child.name}): {child.button}\n")
             f.write(footer)
 
@@ -158,6 +176,6 @@ def get_all_nodes(node, nodes=[]):
         return nodes
     node.added = True
     nodes.append(node)
-    for child in node.children:
+    for child in node._children:
         nodes = get_all_nodes(child, nodes)
     return nodes
