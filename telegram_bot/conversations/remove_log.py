@@ -1,6 +1,6 @@
 from features.data_IO import (
     make_text_from_logs,
-    get_record_by_log_id,
+    get_log_by_id,
     delete_log_and_content,
 )
 from features.log import log_info
@@ -27,7 +27,7 @@ def ask_confirmation_of_removal(update, context):
     try:
         int(log_id)
         context.user_data["remove_log_id"] = log_id
-        row = get_record_by_log_id(log_id)
+        row = get_log_by_id(log_id)
         if not row:
             raise ValueError
         rows = (row,)

@@ -82,8 +82,14 @@ class Node:
         
         if self.data.get("path"):
             options = {"redo": self._parents[0].state, "escape": ConversationHandler.END}
+            if self.data.get("path") == "escape":
+                context.user_data.clear()
             return options[self.data.get("path")]
-        return self.state if self._children else ConversationHandler.END
+        if self._children:
+            return self.state
+        else:
+            context.user_data.clear()
+            return ConversationHandler.END
 
     def get_keyboard(self):
         """ get children's button into keyboard """

@@ -1,4 +1,4 @@
-from features.data_IO import make_text_from_logs, get_logs_by_user_id, get_record_by_log_id, edit_history
+from features.data_IO import make_text_from_logs, get_logs_by_user_id, get_log_by_id, edit_history
 from features.log import log_info
 from features.message import set_context
 from conversations.tree_classes import (
@@ -25,7 +25,7 @@ def ask_log_id_to_edit(update, context):
 def ask_confirmation_of_edit(update, context):
     log_id = update.message.text
     try:
-        log = get_record_by_log_id(log_id)
+        log = get_log_by_id(log_id)
         print(log)
         logs = (log,)
         if not log:

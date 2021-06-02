@@ -170,12 +170,6 @@ def get_today_log_of_chat_id_category(telegram_id, status):
     return log
 
 
-def get_record_by_log_id(log_id):
-
-    log = Log.objects.get_or_none(id=log_id)
-
-    return log
-
 
 def get_record_by_log_ids(log_ids: str):
 
@@ -200,8 +194,9 @@ def get_text_of_log_by_id(log_id):
 
 def get_text_of_log_by_ids(log_ids):
 
-    id_list = log_ids.split(",")
+
     logs = Log.objects.filter(id__in=id_list)
+
     rows = map(return_row, logs)
 
     text_message = make_text_from_logs(rows)
@@ -292,13 +287,11 @@ def make_text_from_logs(logs, header="", footer=""):
     return text_message
 
 
-def put_remarks_by_ids(remarks, log_ids: str):
+def put_remarks_by_id(remarks, log_id: str):
 
-    ids = log_ids.slpit(",")
-    logs = Log.objects.filter(id__in=ids)
-    for log in logs:
-        log.remarks = remarks
-        log.save()
+    log = Log.objects.get_or_none(id=log_id)
+    log.remarks = remarks
+    log.save()
 
 
 def get_logs_by_user_id(user_id, limit: int):
