@@ -133,7 +133,7 @@ def add_location(update, context):
 def confirm_log(update, context):
     """ """
     # update confirmation on log table
-    condition = "done"
+    clear_session(update, context)
     return {"message": "Confirmed."}
 
 
