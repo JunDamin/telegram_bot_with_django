@@ -42,11 +42,13 @@ from features.message import (
 from conversations.tree_functions import clear_session, set_session, is_late
 
 
+@log_info()
 def cancel(update, context):
     clear_session(update, context)
     return {"message": "OK. Good bye!"}
 
 
+@log_info()
 def sign_in_init(update, context):
     # set variable
     chat = update.message.chat
@@ -85,15 +87,14 @@ def sign_in_init(update, context):
     # if log new as below
     condition = ("late" if late else "new") if new else "duplicated"
     # if log not new, then ask again
-    print(update)
     # send primary call backs.
     id = update.message.from_user.id
-    print(text)
     reply_markdown(update, context, reply_message)
     reply_message += REWRITE_FOOTER
     return {"message": reply_message, "condition": condition, "id": id}
 
 
+@log_info()
 def add_optional_status(update, context):
     # update log optional_status
 
@@ -105,6 +106,7 @@ def add_optional_status(update, context):
     return {"message": text_message}
 
 
+@log_info()
 def add_location(update, context):
     """ add location and ask confirmation """
     # Update longitude and latitude on log table
@@ -122,12 +124,12 @@ def add_location(update, context):
         ],
         text_message,
     )
-    print(log.status)
     condition = "content" if log.status == "signing out" and log.optional_status == "Home" else "done"
     condition = "lunch" if log.status == "getting back" else condition
     return {"condition": condition, "message": text_message}
 
 
+@log_info()
 def confirm_log(update, context):
     """ """
     # update confirmation on log table
@@ -135,6 +137,7 @@ def confirm_log(update, context):
     return {"message": "Confirmed."}
 
 
+@log_info()
 def check_rewrite_log(update, context):
     log = get_log_by_id(context.user_data.get("log_id"))
     header_message = ASK_REMOVAL_CONFIRMATION.format(log_id=log.id)
@@ -143,6 +146,7 @@ def check_rewrite_log(update, context):
     return {"message": text_message}
 
 
+@log_info()
 def rewrite_log(update, context):
     log_id = context.user_data.get("log_id")
     session = context.user_data.get("session")
@@ -159,11 +163,13 @@ def rewrite_log(update, context):
     return {"message": text_message}
 
 
+@log_info()
 def ask_reason(update, context):
     text = "Please text me the reason."
     return {"message": text}
 
 
+@log_info()
 def receive_reason(update, context):
     text = update.message.text
     log = get_log_by_id(context.user_data.get("log_id"))
@@ -177,11 +183,13 @@ def receive_reason(update, context):
     return {"message": text_message}
 
 
+@log_info()
 def ask_content(update, context):
     text = "Please text me the today's work."
     return {"message": text}
 
 
+@log_info()
 def confirm_content(update, context):
     answer = update.message.text
     context.user_data["work_content"] = answer
@@ -189,6 +197,8 @@ def confirm_content(update, context):
     text_message = CHECK_CONTENT_TEXT.format(answer=answer)
     return {"message": text_message}
 
+
+@log_info()
 def save_content(update,  context):
     content = context.user_data.get("work_content")
     post_work_content(update, context, content)
@@ -197,6 +207,7 @@ def save_content(update,  context):
     return {"message": text}
 
 
+@log_info()
 def check_distance(update, context):
     session = context.user_data.get("session")
 

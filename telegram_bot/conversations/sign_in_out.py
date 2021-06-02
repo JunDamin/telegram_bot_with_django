@@ -62,6 +62,14 @@ signing_in.set_condtional_children(
     }
 )
 
+signing_out.set_condtional_children(
+    {
+        "new": optional_status,
+        "duplicated": [rewrite, cancel],
+        "late": [ask_reason],
+    }
+)
+
 # location
 location = ConditionalNode(
     "location", "location", add_location, inputType="location"

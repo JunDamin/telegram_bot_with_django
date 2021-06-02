@@ -105,7 +105,6 @@ optional_status_regex = map(lambda x: x.replace("(", "\\("), optional_status_reg
 optional_status_regex = map(lambda x: x.replace(")", "\\)"), optional_status_regex)
 optional_status_regex = list(optional_status_regex)
 
-print(optional_status_regex)
 ASK_LOCATION_TEXT = """I see! Please send me your location by click the button on your phone.
   1. Please check your location service is on.(if not please turn on your location service)
   2. Desktop app can not send location"""
@@ -123,7 +122,6 @@ ask_log_confirmation_regex = []
 for i in ASK_LOG_CONFIRMATION_KEYBOARD:
     ask_log_confirmation_regex.extend(i)
 
-print(ask_log_confirmation_regex)
 
 ASK_WORK_CONTENT = "OK. Please text me what you have done today for work briefly."
 CHECK_CONTENT = "Content of Work\n{answer}\n\nIs it ok?"
@@ -135,5 +133,3 @@ ask_conetent_confirmation_regex = []
 
 for i in CHECK_CONTENT_KEYBOARD:
     ask_conetent_confirmation_regex.extend(i)
-
-print(ask_conetent_confirmation_regex)
