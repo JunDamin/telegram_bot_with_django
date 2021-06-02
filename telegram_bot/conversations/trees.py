@@ -1,5 +1,5 @@
-from conversations.tree_signing import sign_in_tree, sign_out_tree
-from conversations.tree_get_back import get_back_tree
+from conversations.sign_in_out import sign_in_tree, sign_out_tree
+from conversations.get_back import get_back_tree
 
 
 conversations = [

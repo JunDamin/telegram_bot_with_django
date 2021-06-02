@@ -195,3 +195,55 @@ def save_content(update,  context):
     text = "Content has been saved\n"
     text += "Thank you."
     return {"message": text}
+
+
+def check_distance(update, context):
+    session = context.user_data.get("session")
+
+    if session == "signing out":
+        # set variable
+        member = get_or_register_user(update.message.chat, update.message.from_user)
+
+        log_out = get_or_none_log_of_date(member, update.message.date.date(), session)
+        log_in = get_or_none_log_of_date(
+            member, update.message.date.date(), "signing in"
+        )
+
+        if log_out and log_in:
+            x1, y1 = log_out.latitude, log_out.longitude
+            x2, y2 = log_in.latitude, log_in.longitude
+
+            if x1 == "Not Available" or x2 == "Not Available":
+                output = "Not Available"
+                add_confirmation(
+                    log_out,
+                    f"Not Available : Signed in at ({x2}, {y2}), Signed out at ({x1}, {y1})",
+                )
+            elif x1 and y1 and x2 and y2:
+                x1, y1 = map(float, (x1, y1))
+                x2, y2 = map(float, (x2, y2))
+                distance = sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+                if distance < 0.003:
+                    output = "OK"
+                    add_confirmation(
+                        log_out,
+                        f"OK : Signed in at ({x2}, {y2}), Signed out at ({x1}, {y1})",
+                    )
+                else:
+                    output = "Need to Check"
+                    add_confirmation(
+                        log_out,
+                        f"Need to Check : Signed in at ({x2}, {y2}), Signed out at ({x1}, {y1})",
+                    )
+            else:
+                output = "error"
+                add_confirmation(
+                    log_out,
+                    f"Error : Signed in at ({x2}, {y2}), Signed out at ({x1}, {y1})",
+                )
+            log_out.distance = output
+
+        if not log_in:
+            log_out.distance = "No Log in"
+
+        log_out.save()
