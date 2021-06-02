@@ -3,18 +3,13 @@ import pytest
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 from common_parts import (
-    get_reply_of_message_of_id,
+    get_reply_of_message_of_id, bot_id,
 )
 
 # Your API ID, hash and session string here
 api_id = int(os.environ["APP_ID"])
 api_hash = os.environ["APP_HASH"]
 session_str = os.environ["SESSION"]
-
-# constant variable
-chat_room_id = -1001374914057
-bot_id = "@KOICA_test_bot"
-sleep_time = 0.5
 
 
 @pytest.mark.asyncio

@@ -2,6 +2,9 @@ from time import sleep
 from telethon import TelegramClient
 import re
 
+# constant variable
+chat_room_id = -1001374914057
+bot_id = "@KOICA_test_bot"
 sleep_time = 0.5
 chat_room_id = -1001374914057
 bot_id = "@KOICA_test_bot"

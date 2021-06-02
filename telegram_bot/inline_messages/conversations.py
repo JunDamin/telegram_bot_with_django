@@ -32,6 +32,7 @@ def start(update: Update, context: CallbackContext) -> str:
     ]
     keyboard = InlineKeyboardMarkup(buttons)
 
+    text = "\n".join(text)
     update.message.reply_text(text=text, reply_markup=keyboard)
 
     return SELECTING_ACTION

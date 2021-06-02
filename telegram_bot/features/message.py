@@ -42,7 +42,6 @@ def reply_markdown(update, context, text_message, reply_keyboard=False):
 
     text_message = convert_text_to_md(text_message)
     text_list = split_text_with_chunk_size_by_line(text_message)
-
     for text in text_list:
         update.message.reply_markdown_v2(
             text=text,

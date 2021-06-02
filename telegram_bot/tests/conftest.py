@@ -21,3 +21,8 @@ async def client() -> TelegramClient:
     
     await client.disconnect()
     await client.disconnected
+
+# constant variable
+chat_room_id = -444903176
+bot_id = "@KOICA_test_bot"
+sleep_time = 0.5
