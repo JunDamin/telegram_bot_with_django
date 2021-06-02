@@ -1,0 +1,51 @@
+@startuml
+'default
+top to bottom direction
+(getting back) --> (lunch_with_koica): With KOICA Colleagues
+(getting back) --> (lunch wihtout koica): Without any member of KOICA
+(getting back) --> (check rewrite lunch log): Rewrite the lunch log
+(getting back) --> (cancel): Cancel
+(getting back) --> (Ask reason): Yes. I text you the reason
+(lunch_with_koica) --> (location): location
+(lunch_with_koica) --> (location Not available): Not Available
+(location) --> (confirmation): Confirm
+(location) --> (Go back): Go back
+(location) --> (Report content): Send content of today
+(location) --> (Go back): Go back
+(location) --> (confirmation): Confirm
+(location) --> (Go back): Go_back
+(Go back) --> (work at home): Home
+(Go back) --> (work at office): Office
+(Go back) --> (on business trip): Business Trip
+(work at home) --> (location): location
+(work at home) --> (location Not available): Not Available
+(location Not available) --> (confirmation): Confirm
+(location Not available) --> (Go back): Go back
+(location Not available) --> (Report content): Send content of today
+(location Not available) --> (Go back): Go back
+(location Not available) --> (confirmation): Confirm
+(location Not available) --> (Go back): Go_back
+(Report content) --> (receve content): text
+(receve content) --> (save content): Save content
+(receve content) --> (edit content): Edit content
+(save content) --> (confirmation): Confirm
+(save content) --> (Go back): Go back
+(edit content) --> (confirmation): Confirm
+(edit content) --> (Go back): Go back
+(Go back) --> (lunch_with_koica): With KOICA Colleagues
+(Go back) --> (lunch wihtout koica): Without any member of KOICA
+(lunch wihtout koica) --> (location): location
+(lunch wihtout koica) --> (location Not available): Not Available
+(work at office) --> (location): location
+(work at office) --> (location Not available): Not Available
+(on business trip) --> (location): location
+(on business trip) --> (location Not available): Not Available
+(check rewrite lunch log) --> (confirm rewrite): Yes, I delete and write again
+(check rewrite lunch log) --> (cancel): Cancel
+(confirm rewrite) --> (lunch_with_koica): With KOICA Colleagues
+(confirm rewrite) --> (lunch wihtout koica): Without any member of KOICA
+(Ask reason) --> (Receved reason): text
+(Receved reason) --> (work at home): Home
+(Receved reason) --> (work at office): Office
+(Receved reason) --> (on business trip): Business Trip
+@enduml
