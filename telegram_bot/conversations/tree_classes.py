@@ -126,9 +126,9 @@ class ConditionalNode(Node):
         keyboard = [[child.get_button() for child in self._children_dict[condition]]]
         if [key for key in keyboard[0] if not key]:
             keyboard = None
-        return keyboard if self._children else None
+        return keyboard if self._children_dict[condition] else None
 
-    def set_condtional_children(self, children_dict):
+    def set_conditional_children(self, children_dict):
         self._children_dict = children_dict
         self._children = [
             node for key in children_dict.keys() for node in children_dict[key]
