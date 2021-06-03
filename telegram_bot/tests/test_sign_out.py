@@ -73,7 +73,7 @@ async def test_sign_out_first(client: TelegramClient):
         qna = [
             ("Office", "I see"),
             ("Not Available", "You have logged as below."),
-            ("Confirm", "Confirmed"),
+            ("Confirm", "No sign in information"),
         ]
 
         await check_assert_with_qna(qna, conv)
@@ -104,7 +104,7 @@ async def test_sign_out_rewrite(client: TelegramClient):
             ),
             ("It is a test", "Content of Work"),
             ("Save content", "Content has been saved"),
-            ("Confirm", "Confirmed"),
+            ("Confirm", "No sign in information"),
         ]
 
         log_id = await check_assert_with_qna(qna, conv)
@@ -136,7 +136,7 @@ async def test_sign_out_report(client: TelegramClient):
             ),
             ("It is a test", "Content of Work"),
             ("Save content", "Content has been saved"),
-            ("Confirm", "Confirmed"),
+            ("Confirm", "No sign in information"),
         ]
 
         await check_assert_with_qna(qna, conv)
@@ -166,7 +166,7 @@ async def test_sign_out_edit(client: TelegramClient):
             ("Go back", "Where do you work?"),
             ("Office", "I see"),
             ("Not Available", "You have logged as below. Do you want to confirm"),
-            ("Confirm", "Confirmed"),
+            ("Confirm", "No sign in information"),
             ("/work_content", ""),
         ]
 

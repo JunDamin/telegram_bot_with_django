@@ -41,6 +41,7 @@ top to bottom direction
 (confirm rewrite) --> (work at home): Home
 (confirm rewrite) --> (work at office): Office
 (confirm rewrite) --> (on business trip): Business Trip
+(confirm rewrite) --> (Ask reason): Yes. I text you the reason
 (Ask reason) --> (Receved reason): text
 (Receved reason) --> (work at home): Home
 (Receved reason) --> (work at office): Office

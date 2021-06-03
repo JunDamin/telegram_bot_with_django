@@ -1,4 +1,5 @@
 import re
+from telegram import KeyboardButton
 from math import sqrt
 from features.log import log_info
 from features.data_IO import (
@@ -39,7 +40,7 @@ from features.message import (
     initiate_private_conversation,
 )
 
-from conversations.tree_functions import clear_session, set_session, is_late
+from conversations.tree_functions import clear_session, set_session, is_late, is_new_log
 
 
 @log_info()
@@ -53,6 +54,7 @@ def sign_in_init(update, context):
     # set variable
     chat = update.message.chat
     user = update.message.from_user
+    id = update.message.from_user.id
 
     # check chat and user
     register_office(chat)
@@ -61,9 +63,9 @@ def sign_in_init(update, context):
     # set session and log
     status = set_session(update, context)
     message_datetime = update.message.date
-    late = is_late(update, context)
     log = get_or_none_log_of_date(member, message_datetime.date(), status)
-    new = False if log else True
+    late = is_late(update, context)
+    new = is_new_log(update, context)
     if new:
         log = save_log(member, update.message.date, status)
     context.user_data["log_id"] = log.id
@@ -88,9 +90,9 @@ def sign_in_init(update, context):
     condition = ("late" if late else "new") if new else "duplicated"
     # if log not new, then ask again
     # send primary call backs.
-    id = update.message.from_user.id
     reply_markdown(update, context, reply_message)
-    reply_message += REWRITE_FOOTER
+    if not new:
+        reply_message += REWRITE_FOOTER
     return {"message": reply_message, "condition": condition, "id": id}
 
 
@@ -103,7 +105,7 @@ def add_optional_status(update, context):
     optional_status = update.message.text
     put_sub_category(context.user_data["log_id"], optional_status)
     text_message = ASK_LOCATION_TEXT
-    return {"message": text_message}
+    return {"message": text_message, "keyboard": [[KeyboardButton("Share Location", request_location=True)]]}
 
 
 @log_info()
@@ -155,12 +157,18 @@ def rewrite_log(update, context):
     log.delete()
     log = save_log(member, update.message.date, session)
     context.user_data["log_id"] = log.id
+    # set condition
+    late = is_late(update, context)
+    condition = "late" if late else "new"
 
     # add info
     text = "You have relogged as below.\n"
     text_message = make_text_from_logs((log,), text)
-    text_message += "Please choose where you work."
-    return {"message": text_message}
+    if condition == "late":
+        text_message += "\n You are late. Please text me the reason."
+    else:
+        text_message += "\nPlease choose where you work."
+    return {"message": text_message, "condition": condition}
 
 
 @log_info()
@@ -171,6 +179,8 @@ def ask_reason(update, context):
 
 @log_info()
 def receive_reason(update, context):
+
+    # processing
     text = update.message.text
     log = get_log_by_id(context.user_data.get("log_id"))
     remarks_text = (log.remarks + "\n") if log.remarks else ""
@@ -179,8 +189,8 @@ def receive_reason(update, context):
     text_message = "I got your message as below.\n\n"
     text_message += text
     text_message += "\n\nPlease choose where you work."
-
-    return {"message": text_message}
+    
+    return {"message": text_message, }
 
 
 @log_info()
@@ -240,7 +250,7 @@ def check_location(update, context):
         )
         if not log_in:
             text_message = "No sign in information found today.\n"
-            text_message = "Please contact the director."
+            text_message += "Please contact the director."
             return {"message": text_message, "condition": "confirmed"}
         if check_distance(log_in, log_out):
             text_message = "Your sign out location is not matched with sign in location.\n"

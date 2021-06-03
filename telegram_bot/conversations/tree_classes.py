@@ -95,8 +95,7 @@ class Node:
         """ get children's button into keyboard """
         # check cumstom keyboard
         if self.data.get("keyboard"):
-            return self.data.get("keyboard") if not [[]] else None
-
+            return self.data.get("keyboard") if self.data.get("keyboard") is not [[]] else None
         keyboard = [[child.get_button() for child in self._children]]
         #  check none key
         if [key for key in keyboard[0] if not key]:

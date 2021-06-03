@@ -50,12 +50,14 @@ def set_session(update, context):
             return status
     return None
 
+
 def clear_session(udpate, context):
     context.user_data.clear()
 
+
 def is_late(update, context):
     message_datetime = update.message.date
-    status = set_session(update, context)
+    status = context.user_data.get("session")
     chat = update.message.chat
     user = update.message.from_user
     member = get_or_register_user(chat, user)
@@ -64,3 +66,17 @@ def is_late(update, context):
         status == "signing in"
         and message_datetime.astimezone(member.office_fk.timezone).time() > open_time
     )
+
+
+def is_new_log(update, context):
+    # set variable
+    chat = update.message.chat
+    user = update.message.from_user
+    member = get_or_register_user(chat, user)
+
+    # set session and log
+    session = context.user_data.get("session")
+    message_datetime = update.message.date
+    log = get_or_none_log_of_date(member, message_datetime.date(), session)
+    new = False if log else True
+    return new

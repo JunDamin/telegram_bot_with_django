@@ -36,22 +36,24 @@ business_trip = Node(
     "on business trip", "Business Trip", add_optional_status, isEntry=True
 ).set_parents([signing_in])
 optional_status = [work_at_home, work_at_office, business_trip]
-# Over write flow
-rewrite = Node("check rewrite", "Rewrite the log", check_rewrite_log, isEntry=True)
-confirm_rewrite = (
-    Node("confirm rewrite", "Yes, I delete and write again", rewrite_log)
-    .set_parents([rewrite])
-    .set_children(optional_status)
-)
-cancel = Node("cancel", "Cancel", cancel).set_parents([rewrite])
 
 # ask reason
 ask_reason = Node("Ask reason", "Yes. I text you the reason", ask_reason, isEntry=True)
-receive_reason = (
-    Node("Receved reason", "text", receive_reason, inputType="text")
-    .set_parents([ask_reason])
-    .set_children(optional_status)
-)
+receive_reason = Node(
+    "Receved reason", "text", receive_reason, inputType="text"
+).set_parents([ask_reason]).set_children(optional_status)
+
+# Over write flow
+rewrite = Node("check rewrite", "Rewrite the log", check_rewrite_log, isEntry=True)
+confirm_rewrite = (
+    ConditionalNode("confirm rewrite", "Yes, I delete and write again", rewrite_log)
+    .set_parents([rewrite])
+)    
+confirm_rewrite.set_conditional_children({
+        "new": optional_status,
+        "late": [ask_reason],
+    })
+cancel = Node("cancel", "Cancel", cancel).set_parents([rewrite])
 
 # connect
 signing_in.set_conditional_children(
@@ -79,7 +81,9 @@ not_available = ConditionalNode(
 ).set_parents(optional_status)
 
 # Confirmation
-check_location = ConditionalNode("confirmation", "Confirm", check_location).set_parents([location])
+check_location = ConditionalNode("confirmation", "Confirm", check_location).set_parents(
+    [location]
+)
 edit = (
     Node("Go back", "Go back", lambda x, y: {"message": "Where do you work?"})
     .set_parents([location])
@@ -122,8 +126,12 @@ not_available.set_conditional_children(
 
 # get remarks when the location is not match
 
-explaining_diffrence = Node("location is changed", "Explain The location difference", explain_location)
-getting_explain = Node("get explain", "get text", save_explain, inputType="text").set_parents([explaining_diffrence])
+explaining_diffrence = Node(
+    "location is changed", "Explain The location difference", explain_location
+)
+getting_explain = Node(
+    "get explain", "get text", save_explain, inputType="text"
+).set_parents([explaining_diffrence])
 end = Node("end", "Confirm", confirm_log)
 getting_explain.set_children([end, explaining_diffrence])
 
