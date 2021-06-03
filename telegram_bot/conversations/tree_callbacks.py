@@ -203,58 +203,64 @@ def save_content(update,  context):
     content = context.user_data.get("work_content")
     post_work_content(update, context, content)
     text = "Content has been saved\n"
-    text += "Thank you."
+    text += "Do you confirm the log?"
     return {"message": text}
 
 
-@log_info()
-def check_distance(update, context):
-    session = context.user_data.get("session")
+def check_distance(log_in, log_out):
+    if log_out and log_in:
+        x1, y1 = log_out.latitude, log_out.longitude
+        x2, y2 = log_in.latitude, log_in.longitude
+        if x1 == "Not Available" or x2 == "Not Available":
+            return False
+        
+        p1 = list(map(float, (x1, y1)))
+        p2 = list(map(float, (x2, y2)))
+        distance = get_distance(p1, p2)
+        return True if distance > 0.003 else False
+    return False
 
+
+def get_distance(p1, p2):
+    distance = sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
+    return distance
+
+
+@log_info()
+def check_location(update, context):
+    session = context.user_data.get("session")
+    log_in, log_out = None, None
+    text_message = "Confirmed"
     if session == "signing out":
         # set variable
         member = get_or_register_user(update.message.chat, update.message.from_user)
-
-        log_out = get_or_none_log_of_date(member, update.message.date.date(), session)
+        log_out = get_or_none_log_of_date(member, update.message.date.date(), "signing out")
         log_in = get_or_none_log_of_date(
             member, update.message.date.date(), "signing in"
         )
-
-        if log_out and log_in:
-            x1, y1 = log_out.latitude, log_out.longitude
-            x2, y2 = log_in.latitude, log_in.longitude
-
-            if x1 == "Not Available" or x2 == "Not Available":
-                output = "Not Available"
-                add_confirmation(
-                    log_out,
-                    f"Not Available : Signed in at ({x2}, {y2}), Signed out at ({x1}, {y1})",
-                )
-            elif x1 and y1 and x2 and y2:
-                x1, y1 = map(float, (x1, y1))
-                x2, y2 = map(float, (x2, y2))
-                distance = sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
-                if distance < 0.003:
-                    output = "OK"
-                    add_confirmation(
-                        log_out,
-                        f"OK : Signed in at ({x2}, {y2}), Signed out at ({x1}, {y1})",
-                    )
-                else:
-                    output = "Need to Check"
-                    add_confirmation(
-                        log_out,
-                        f"Need to Check : Signed in at ({x2}, {y2}), Signed out at ({x1}, {y1})",
-                    )
-            else:
-                output = "error"
-                add_confirmation(
-                    log_out,
-                    f"Error : Signed in at ({x2}, {y2}), Signed out at ({x1}, {y1})",
-                )
-            log_out.distance = output
-
         if not log_in:
-            log_out.distance = "No Log in"
+            text_message = "No sign in information found today.\n"
+            text_message = "Please contact the director."
+            return {"message": text_message, "condition": "confirmed"}
+        if check_distance(log_in, log_out):
+            text_message = "Your sign out location is not matched with sign in location.\n"
+            text_message += "Please, send us your location again or explain me the diffrence."
+            return {"message": text_message, "condition": "location"}
+    # update confirmation on log table
+    clear_session(update, context)
+    return {"message": text_message, "condition": "confirmed"}
 
-        log_out.save()
+
+def explain_location(update, context):
+    return {"message": "Please text me the reason"}
+
+def save_explain(update, context):
+    text = update.message.text
+    log = get_log_by_id(context.user_data.get("log_id"))
+    confirmation_text = (log.confirmation + "\n") if log.confirmation else ""
+    log.confirmation = f"(location) {confirmation_text} {text}"
+    log.save()
+    text_message = "I got your message as below.\n\n"
+    text_message += confirmation_text
+    text_message += "\n\nIf you want to change it,\nplease press 'Explain The location difference' button"
+    return {"message": text_message}

@@ -66,7 +66,7 @@ confirm_rewrite_lunch = (
 cancel = Node("cancel", "Cancel", cancel).set_parents([rewrite_lunch])
 
 # set getting back
-getting_back.set_condtional_children(
+getting_back.set_conditional_children(
     {
         "new": lunch_options,
         "duplicated": [rewrite_lunch, cancel],
@@ -74,13 +74,13 @@ getting_back.set_condtional_children(
 )
 
 # update location
-location.set_condtional_children(
+location.set_conditional_children(
     {
         "lunch": [confirm, edit_lunch],
     }
 )
 
-not_available.set_condtional_children(
+not_available.set_conditional_children(
     {
         "lunch": [confirm, edit_lunch],
     }

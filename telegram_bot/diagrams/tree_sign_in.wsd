@@ -13,6 +13,11 @@ top to bottom direction
 (location) --> (Go back): Go back
 (location) --> (Report content): Send content of today
 (location) --> (Go back): Go back
+(confirmation) --> (location is changed): Explain The location difference
+(confirmation) --> (location): location
+(location is changed) --> (get explain): get text
+(get explain) --> (end): Confirm
+(get explain) --> (location is changed): Explain The location difference
 (Go back) --> (work at home): Home
 (Go back) --> (work at office): Office
 (Go back) --> (on business trip): Business Trip

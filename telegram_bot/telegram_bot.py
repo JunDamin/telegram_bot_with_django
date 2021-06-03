@@ -2,7 +2,6 @@ import os
 from collections import deque
 from telegram.ext import Updater
 from features.callback_function import command_handlers
-from conversations.conversation import conversation_handlers
 from conversations.trees import conversations
 from inline_messages.conversations import inline_convs
 
@@ -27,7 +26,6 @@ def main():
     # on messages handling i.e message - set callback function for each message keywords
 
     # add hander from conversations
-    deque(map(dp.add_handler, conversation_handlers))
     deque(map(dp.add_handler, conversations))
     deque(map(dp.add_handler, inline_convs))
 

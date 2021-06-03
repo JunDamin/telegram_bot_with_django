@@ -54,7 +54,7 @@ receive_reason = (
 )
 
 # connect
-signing_in.set_condtional_children(
+signing_in.set_conditional_children(
     {
         "new": optional_status,
         "duplicated": [rewrite, cancel],
@@ -62,7 +62,7 @@ signing_in.set_condtional_children(
     }
 )
 
-signing_out.set_condtional_children(
+signing_out.set_conditional_children(
     {
         "new": optional_status,
         "duplicated": [rewrite, cancel],
@@ -79,7 +79,7 @@ not_available = ConditionalNode(
 ).set_parents(optional_status)
 
 # Confirmation
-confirm = Node("confirmation", "Confirm", confirm_log).set_parents([location])
+check_location = ConditionalNode("confirmation", "Confirm", check_location).set_parents([location])
 edit = (
     Node("Go back", "Go back", lambda x, y: {"message": "Where do you work?"})
     .set_parents([location])
@@ -96,28 +96,44 @@ ask_content_confirmation = Node(
 save_content = (
     Node("save content", "Save content", save_content)
     .set_parents([ask_content_confirmation])
-    .set_children([confirm, edit])
+    .set_children([check_location, edit])
 )
 content_edited = (
     Node("edit content", "Edit content", ask_content)
     .set_parents([ask_content_confirmation])
-    .set_children([confirm, edit])
+    .set_children([check_location, edit])
 )
+
 
 # update location
-location.set_condtional_children(
+location.set_conditional_children(
     {
-        "done": [confirm, edit],
+        "done": [check_location, edit],
         "content": [asking_content, edit],
     }
 )
 
-not_available.set_condtional_children(
+not_available.set_conditional_children(
     {
-        "done": [confirm, edit],
+        "done": [check_location, edit],
         "content": [asking_content, edit],
     }
 )
+
+# get remarks when the location is not match
+
+explaining_diffrence = Node("location is changed", "Explain The location difference", explain_location)
+getting_explain = Node("get explain", "get text", save_explain, inputType="text").set_parents([explaining_diffrence])
+end = Node("end", "Confirm", confirm_log)
+getting_explain.set_children([end, explaining_diffrence])
+
+check_location.set_conditional_children(
+    {
+        "confirmed": [],
+        "location": [explaining_diffrence, location],
+    }
+)
+
 # create tree
 sign_in_tree = ConversationTree(signing_in)
 sign_out_tree = ConversationTree(signing_out)
