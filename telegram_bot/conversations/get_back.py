@@ -35,10 +35,10 @@ without_koica = (
 lunch_options = [with_koica, without_koica]
 
 # location
-location = ConditionalNode(
+location = Node(
     "location", "location", add_location, inputType="location"
 ).set_parents(lunch_options)
-not_available = ConditionalNode(
+not_available = Node(
     "location Not available", "Not Available", add_location
 ).set_parents(lunch_options)
 
@@ -74,16 +74,10 @@ getting_back.set_conditional_children(
 )
 
 # update location
-location.set_conditional_children(
-    {
-        "lunch": [confirm, edit_lunch],
-    }
-)
+location.set_children([confirm, edit_lunch])
 
-not_available.set_conditional_children(
-    {
-        "lunch": [confirm, edit_lunch],
-    }
-)
+not_available.set_children([confirm, edit_lunch],)
 # create tree
 get_back_tree = ConversationTree(getting_back)
+
+get_back_tree.get_graph("telegram_bot/diagrams/tree_get_back.wsd")
