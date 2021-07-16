@@ -270,7 +270,7 @@ def save_explain(update, context):
     confirmation_text = (log.confirmation + "\n") if log.confirmation else ""
     log.confirmation = f"(location) {confirmation_text} {text}"
     log.save()
-    text_message = "I got your message as below.\n\n"
-    text_message += confirmation_text
+    text_message = "I got your message as below.\n"
+    text_message += log.confirmation
     text_message += "\n\nIf you want to change it,\nplease press 'Explain The location difference' button"
     return {"message": text_message}
