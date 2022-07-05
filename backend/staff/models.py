@@ -15,7 +15,7 @@ class Member(core_models.TimeStampedModel):
     yearly_leave = models.FloatField(null=True)
 
     def __str__(self):
-        return " ".join([self.first_name, self.last_name])
+        return " ".join(filter(lambda x: x, [self.first_name, self.last_name]))
 
     def full_name(self):
         return f"{self.first_name} {self.last_name}"

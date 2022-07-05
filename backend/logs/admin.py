@@ -89,7 +89,7 @@ class LogAdmin(ImportExportMixin, ExportActionMixin, admin.ModelAdmin):
 
     list_display = (
         "id",
-        # "member_fk",
+        "member_fk",
         "working_day",
         "local_time",
         "local_weekday",
@@ -181,7 +181,7 @@ class LeaveResource(resources.ModelResource):
         model = models.Leave
         fields = (
             "id",
-            # "member_fk",
+            "member_fk",
             "leave_type",
             "start_date",
             "end_date",
